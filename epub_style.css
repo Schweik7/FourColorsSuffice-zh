@@ -1,0 +1,39 @@
+/* 补充样式：图片与图注居中显示 */
+img {
+  display: block;
+  margin: 1em auto;
+  max-width: 100%;
+}
+figure {
+  text-align: center;
+  margin: 1em auto;
+}
+figcaption {
+  text-align: center;
+  font-size: 0.85em;
+  color: #555555;
+  margin-top: 0.3em;
+  line-height: 1.4;
+}
+
+/* 译者注：正文中以 [...]{.tnote} 标记的行内译注，小一号字体并略微区分颜色 */
+.tnote {
+  font-size: 0.85em;
+  color: #555555;
+}
+
+/* 引用：书信、访谈原话等独立引文，与正文拉开视觉区别 */
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.2em 1.2em;
+  border-left: 3px solid #b8ad8f;
+  background: rgba(184, 173, 143, 0.08);
+  color: #444444;
+  font-size: 0.95em;
+}
+blockquote p {
+  margin: 0.7em 0;
+}
+blockquote strong {
+  color: #2a2a2a;
+}

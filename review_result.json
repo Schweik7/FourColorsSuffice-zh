@@ -1,0 +1,961 @@
+{
+  "project": "《四色足矣：四色猜想是如何解决的》插图重绘校对结果",
+  "exported_at": "2026-08-05T02:44:05",
+  "summary": {
+    "total": 217,
+    "approved": 113,
+    "needs_fix": 104,
+    "pending": 0
+  },
+  "instructions_for_ai": "请逐条处理 needs_fix。每条给出 svg（待修改文件）、original（原始扫描件，供对照）和 comment（人工修改意见）。修改后覆盖同名 .svg，不要动 original，也不要修改 _redraw_tools/ 下的共享文件。",
+  "needs_fix": [
+    {
+      "id": "fig-004",
+      "desc": "国家A与B相邻示意图",
+      "original": "images/fig-004_国家A与B相邻示意图.jpg",
+      "svg": "images/fig-004_国家A与B相邻示意图.svg",
+      "comment": "这里boundarylines和国家区域指向的地方不对；把几个单词改为中文；",
+      "reviewed_at": "2026-08-05T01:55:49"
+    },
+    {
+      "id": "fig-006",
+      "desc": "比利时法国德国卢森堡地图",
+      "original": "images/fig-006_比利时法国德国卢森堡地图.jpg",
+      "svg": "images/fig-006_比利时法国德国卢森堡地图.svg",
+      "comment": "使用真实地图数据；把几个地方改为中文，然后Lux.放到中间小小的黄色区域，可以调小字号",
+      "reviewed_at": "2026-08-05T01:56:48"
+    },
+    {
+      "id": "fig-011",
+      "desc": "分裂国家标注区域1地图",
+      "original": "images/fig-011_分裂国家标注区域1地图.jpg",
+      "svg": "images/fig-011_分裂国家标注区域1地图.svg",
+      "comment": "这其实是一个国际象棋棋盘，生成正常黑白两色棋盘",
+      "reviewed_at": "2026-08-05T01:58:54"
+    },
+    {
+      "id": "fig-012",
+      "desc": "分裂国家五色着色结果",
+      "original": "images/fig-012_分裂国家五色着色结果.jpg",
+      "svg": "images/fig-012_分裂国家五色着色结果.svg",
+      "comment": "这里是想表达飞地的概念。把几个区域都填上数字",
+      "reviewed_at": "2026-08-05T02:00:19"
+    },
+    {
+      "id": "fig-014",
+      "desc": "地图画在球面上示意图",
+      "original": "images/fig-014_地图画在球面上示意图.jpg",
+      "svg": "images/fig-014_地图画在球面上示意图.svg",
+      "comment": "整体 换成一个球体。球面的颜色是蓝色",
+      "reviewed_at": "2026-08-05T02:01:01"
+    },
+    {
+      "id": "fig-015",
+      "desc": "球极投影示意图",
+      "original": "images/fig-015_球极投影示意图.jpg",
+      "svg": "images/fig-015_球极投影示意图.svg",
+      "comment": "和fig-014关联，是表达投影下来，球面上的线条也投下来了",
+      "reviewed_at": "2026-08-05T02:01:34"
+    },
+    {
+      "id": "fig-018",
+      "desc": "只有一个边界线的国家",
+      "original": "images/fig-018_只有一个边界线的国家.jpg",
+      "svg": "images/fig-018_只有一个边界线的国家.svg",
+      "comment": "这里其实左侧和右侧只有一个点相邻。右侧的区域有点太奇怪了，右侧可以是一个正常的任意图案",
+      "reviewed_at": "2026-08-05T02:03:04"
+    },
+    {
+      "id": "fig-019",
+      "desc": "交汇点两边界线移除示意图",
+      "original": "images/fig-019_交汇点两边界线移除示意图.jpg",
+      "svg": "images/fig-019_交汇点两边界线移除示意图.svg",
+      "comment": "原文是：最后，我们可以假设每个交汇点处至少有三条边界线相交。如果某个交汇点只有两条边界线，只需去掉该点即可，不会影响着色。  在一台边界线上画一个点，然后去掉该点即可",
+      "reviewed_at": "2026-08-05T02:04:04"
+    },
+    {
+      "id": "fig-020",
+      "desc": "三次图四色着色练习地图",
+      "original": "images/fig-020_三次图四色着色练习地图.jpg",
+      "svg": "images/fig-020_三次图四色着色练习地图.svg",
+      "comment": "这是一个练习地图。原文：在尝试解决四色问题时，我们总是可以只关注那些每个交汇点处恰好有三条边界线相交的地图，如下页图所示。这类地图十分常见，我们给它们起了一个专门的名字：**三次图**。您可以尝试用四种颜色给这幅地图着色。  可以自己生成一个",
+      "reviewed_at": "2026-08-05T02:04:48"
+    },
+    {
+      "id": "fig-021",
+      "desc": "例1三国已着色待完成地图",
+      "original": "images/fig-021_例1三国已着色待完成地图.jpg",
+      "svg": "images/fig-021_例1三国已着色待完成地图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:13:31"
+    },
+    {
+      "id": "fig-022",
+      "desc": "例1国家A着蓝色尝试着色",
+      "original": "images/fig-022_例1国家A着蓝色尝试着色.jpg",
+      "svg": "images/fig-022_例1国家A着蓝色尝试着色.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:13:33"
+    },
+    {
+      "id": "fig-023",
+      "desc": "例1国家A着红色尝试着色",
+      "original": "images/fig-023_例1国家A着红色尝试着色.jpg",
+      "svg": "images/fig-023_例1国家A着红色尝试着色.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:13:34"
+    },
+    {
+      "id": "fig-024",
+      "desc": "例1完成后的四色着色",
+      "original": "images/fig-024_例1完成后的四色着色.jpg",
+      "svg": "images/fig-024_例1完成后的四色着色.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:13:37"
+    },
+    {
+      "id": "fig-025",
+      "desc": "麦格雷戈110区域愚人节地图",
+      "original": "images/fig-025_麦格雷戈110区域愚人节地图.jpg",
+      "svg": "images/fig-025_麦格雷戈110区域愚人节地图.svg",
+      "comment": "建议你对图像进行灰度处理后再重绘",
+      "reviewed_at": "2026-08-05T02:13:01"
+    },
+    {
+      "id": "fig-026",
+      "desc": "德摩根信中学生四色示例图",
+      "original": "images/fig-026_德摩根信中学生四色示例图.jpg",
+      "svg": "images/fig-026_德摩根信中学生四色示例图.svg",
+      "comment": "保持不变，这是历史原图",
+      "reviewed_at": "2026-08-05T02:11:47"
+    },
+    {
+      "id": "fig-027",
+      "desc": "弗朗西斯·格思里关键图示",
+      "original": "images/fig-027_弗朗西斯·格思里关键图示.jpg",
+      "svg": "images/fig-027_弗朗西斯·格思里关键图示.svg",
+      "comment": "历史原图，不必绘制",
+      "reviewed_at": "2026-08-05T02:13:54"
+    },
+    {
+      "id": "fig-028",
+      "desc": "弗雷德里克五根棒三维例子",
+      "original": "images/fig-028_弗雷德里克五根棒三维例子.jpg",
+      "svg": "images/fig-028_弗雷德里克五根棒三维例子.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:14:50"
+    },
+    {
+      "id": "fig-029",
+      "desc": "蒂策n5三维棒构造例子",
+      "original": "images/fig-029_蒂策n5三维棒构造例子.jpg",
+      "svg": "images/fig-029_蒂策n5三维棒构造例子.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:15:11"
+    },
+    {
+      "id": "fig-031",
+      "desc": "德摩根致哈密顿信三隔间图示",
+      "original": "images/fig-031_德摩根致哈密顿信三隔间图示.jpg",
+      "svg": "images/fig-031_德摩根致哈密顿信三隔间图示.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:15:23"
+    },
+    {
+      "id": "fig-032",
+      "desc": "德摩根致休厄尔信四隔间公理图示",
+      "original": "images/fig-032_德摩根致休厄尔信四隔间公理图示.jpg",
+      "svg": "images/fig-032_德摩根致休厄尔信四隔间公理图示.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:15:57"
+    },
+    {
+      "id": "fig-033",
+      "desc": "环面七国相邻地图",
+      "original": "images/fig-033_环面七国相邻地图.jpg",
+      "svg": "images/fig-033_环面七国相邻地图.svg",
+      "comment": "后续重绘",
+      "reviewed_at": "2026-08-05T02:16:18"
+    },
+    {
+      "id": "fig-038",
+      "desc": "五位王子问题图c区域D在外",
+      "original": "images/fig-038_五位王子问题图c区域D在外.jpg",
+      "svg": "images/fig-038_五位王子问题图c区域D在外.svg",
+      "comment": "这里D是和ABC各有3个地方相连",
+      "reviewed_at": "2026-08-05T02:17:09"
+    },
+    {
+      "id": "fig-039",
+      "desc": "五座宫殿问题图a三宫殿连接",
+      "original": "images/fig-039_五座宫殿问题图a三宫殿连接.jpg",
+      "svg": "images/fig-039_五座宫殿问题图a三宫殿连接.svg",
+      "comment": "A和BC的线没连上去",
+      "reviewed_at": "2026-08-05T02:17:24"
+    },
+    {
+      "id": "fig-040",
+      "desc": "五座宫殿问题图b宫殿D在内",
+      "original": "images/fig-040_五座宫殿问题图b宫殿D在内.jpg",
+      "svg": "images/fig-040_五座宫殿问题图b宫殿D在内.svg",
+      "comment": "A和BCD的线没连上",
+      "reviewed_at": "2026-08-05T02:17:37"
+    },
+    {
+      "id": "fig-041",
+      "desc": "五座宫殿问题图c宫殿D在外",
+      "original": "images/fig-041_五座宫殿问题图c宫殿D在外.jpg",
+      "svg": "images/fig-041_五座宫殿问题图c宫殿D在外.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:17:43"
+    },
+    {
+      "id": "fig-042",
+      "desc": "区域与宫殿叠加图示",
+      "original": "images/fig-042_区域与宫殿叠加图示.jpg",
+      "svg": "images/fig-042_区域与宫殿叠加图示.svg",
+      "comment": "同上，线没连上",
+      "reviewed_at": "2026-08-05T02:18:00"
+    },
+    {
+      "id": "fig-043",
+      "desc": "D和E未连接图示",
+      "original": "images/fig-043_D和E未连接图示.jpg",
+      "svg": "images/fig-043_D和E未连接图示.svg",
+      "comment": "进行灰度处理后仕途",
+      "reviewed_at": "2026-08-05T02:18:20"
+    },
+    {
+      "id": "fig-044",
+      "desc": "D和E用桥连接图示",
+      "original": "images/fig-044_D和E用桥连接图示.jpg",
+      "svg": "images/fig-044_D和E用桥连接图示.svg",
+      "comment": "fig043修改后再画一个桥连接ED",
+      "reviewed_at": "2026-08-05T02:18:42"
+    },
+    {
+      "id": "fig-045",
+      "desc": "环面划分七个相邻区域示意图",
+      "original": "images/fig-045_环面划分七个相邻区域示意图.jpg",
+      "svg": "images/fig-045_环面划分七个相邻区域示意图.svg",
+      "comment": "后续修改",
+      "reviewed_at": "2026-08-05T02:18:53"
+    },
+    {
+      "id": "fig-047",
+      "desc": "立方体与四棱锥示意图",
+      "original": "images/fig-047_立方体与四棱锥示意图.jpg",
+      "svg": "images/fig-047_立方体与四棱锥示意图.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:19"
+    },
+    {
+      "id": "fig-048",
+      "desc": "正四面体",
+      "original": "images/fig-048_正四面体.jpg",
+      "svg": "images/fig-048_正四面体.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:21"
+    },
+    {
+      "id": "fig-049",
+      "desc": "立方体",
+      "original": "images/fig-049_立方体.jpg",
+      "svg": "images/fig-049_立方体.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:23"
+    },
+    {
+      "id": "fig-050",
+      "desc": "正八面体",
+      "original": "images/fig-050_正八面体.jpg",
+      "svg": "images/fig-050_正八面体.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:25"
+    },
+    {
+      "id": "fig-051",
+      "desc": "正十二面体",
+      "original": "images/fig-051_正十二面体.jpg",
+      "svg": "images/fig-051_正十二面体.svg",
+      "comment": "转一下视角吧，这个视角太丑了，有几面被完全挡住了。为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:31"
+    },
+    {
+      "id": "fig-052",
+      "desc": "正二十面体",
+      "original": "images/fig-052_正二十面体.jpg",
+      "svg": "images/fig-052_正二十面体.svg",
+      "comment": "转一下视角吧，这个视角太丑了，有几面被完全挡住了。重要的是为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:10:07"
+    },
+    {
+      "id": "fig-053",
+      "desc": "棱柱",
+      "original": "images/fig-053_棱柱.jpg",
+      "svg": "images/fig-053_棱柱.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:10:20"
+    },
+    {
+      "id": "fig-054",
+      "desc": "反棱柱",
+      "original": "images/fig-054_反棱柱.jpg",
+      "svg": "images/fig-054_反棱柱.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:10:24"
+    },
+    {
+      "id": "fig-055",
+      "desc": "截半立方体",
+      "original": "images/fig-055_截半立方体.jpg",
+      "svg": "images/fig-055_截半立方体.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:10:27"
+    },
+    {
+      "id": "fig-056",
+      "desc": "截角八面体",
+      "original": "images/fig-056_截角八面体.jpg",
+      "svg": "images/fig-056_截角八面体.svg",
+      "comment": "为不同的面染上不同的阴影，转一下视角",
+      "reviewed_at": "2026-08-05T02:10:52"
+    },
+    {
+      "id": "fig-057",
+      "desc": "截角二十面体",
+      "original": "images/fig-057_截角二十面体.jpg",
+      "svg": "images/fig-057_截角二十面体.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:11:14"
+    },
+    {
+      "id": "fig-059",
+      "desc": "C30巴基球",
+      "original": "images/fig-059_C30巴基球.jpg",
+      "svg": "images/fig-059_C30巴基球.svg",
+      "comment": "C30巴基球",
+      "reviewed_at": "2026-08-05T02:08:52"
+    },
+    {
+      "id": "fig-060",
+      "desc": "C60巴基球",
+      "original": "images/fig-060_C60巴基球.jpg",
+      "svg": "images/fig-060_C60巴基球.svg",
+      "comment": "C60巴基球。体现足球特征。或者使用fig-074的重绘",
+      "reviewed_at": "2026-08-05T02:21:31"
+    },
+    {
+      "id": "fig-061",
+      "desc": "足球",
+      "original": "images/fig-061_足球.jpg",
+      "svg": "images/fig-061_足球.svg",
+      "comment": "一个正常的六边形+五边形组成的足球即可。可以用网络图片",
+      "reviewed_at": "2026-08-05T02:07:44"
+    },
+    {
+      "id": "fig-062",
+      "desc": "立方体投影到平面示意图",
+      "original": "images/fig-062_立方体投影到平面示意图.jpg",
+      "svg": "images/fig-062_立方体投影到平面示意图.svg",
+      "comment": "为不同的面染上不同的阴影",
+      "reviewed_at": "2026-08-05T02:19:17"
+    },
+    {
+      "id": "fig-066",
+      "desc": "移除悬垂边示意图",
+      "original": "images/fig-066_移除悬垂边示意图.jpg",
+      "svg": "images/fig-066_移除悬垂边示意图.svg",
+      "comment": "三角形，其中一个点还有一条边，表达它可以移除不影响",
+      "reviewed_at": "2026-08-05T02:20:13"
+    },
+    {
+      "id": "fig-068",
+      "desc": "吕利耶单孔立方体多面体图",
+      "original": "images/fig-068_吕利耶单孔立方体多面体图.jpg",
+      "svg": "images/fig-068_吕利耶单孔立方体多面体图.svg",
+      "comment": "为不同的面染上不同的阴影，表达出内部孔洞的概念",
+      "reviewed_at": "2026-08-05T02:20:53"
+    },
+    {
+      "id": "fig-075",
+      "desc": "截角八面体六个正方形示意图",
+      "original": "images/fig-075_截角八面体六个正方形示意图.jpg",
+      "svg": "images/fig-075_截角八面体六个正方形示意图.svg",
+      "comment": "转个角度",
+      "reviewed_at": "2026-08-05T02:21:55"
+    },
+    {
+      "id": "fig-077",
+      "desc": "新区域被四色包围无法着色图",
+      "original": "images/fig-077_新区域被四色包围无法着色图.jpg",
+      "svg": "images/fig-077_新区域被四色包围无法着色图.svg",
+      "comment": "完全不对。后续重绘",
+      "reviewed_at": "2026-08-05T02:22:08"
+    },
+    {
+      "id": "fig-078",
+      "desc": "交汇点补丁化为三次图示意",
+      "original": "images/fig-078_交汇点补丁化为三次图示意.jpg",
+      "svg": "images/fig-078_交汇点补丁化为三次图示意.svg",
+      "comment": "几个”花瓣“区域应该相邻",
+      "reviewed_at": "2026-08-05T02:22:41"
+    },
+    {
+      "id": "fig-079",
+      "desc": "添加环形国家限外边界三色图",
+      "original": "images/fig-079_添加环形国家限外边界三色图.jpg",
+      "svg": "images/fig-079_添加环形国家限外边界三色图.svg",
+      "comment": "和上图相关",
+      "reviewed_at": "2026-08-05T02:22:50"
+    },
+    {
+      "id": "fig-082",
+      "desc": "着色重新着色扩展示例地图",
+      "original": "images/fig-082_着色重新着色扩展示例地图.jpg",
+      "svg": "images/fig-082_着色重新着色扩展示例地图.svg",
+      "comment": "为所有的颜色都标上一个字母吧，避免有色弱人群",
+      "reviewed_at": "2026-08-05T02:23:55"
+    },
+    {
+      "id": "fig-093",
+      "desc": "三角形恢复着色成功示意图",
+      "original": "images/fig-093_三角形恢复着色成功示意图.jpg",
+      "svg": "images/fig-093_三角形恢复着色成功示意图.svg",
+      "comment": "不要把线伸出来。这图就是普通的区域着色",
+      "reviewed_at": "2026-08-05T02:25:16"
+    },
+    {
+      "id": "fig-094",
+      "desc": "正方形五边形被四色包围无备用色图",
+      "original": "images/fig-094_正方形五边形被四色包围无备用色图.jpg",
+      "svg": "images/fig-094_正方形五边形被四色包围无备用色图.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:25:23"
+    },
+    {
+      "id": "fig-095",
+      "desc": "肯普链情况1红绿部分分离图",
+      "original": "images/fig-095_肯普链情况1红绿部分分离图.jpg",
+      "svg": "images/fig-095_肯普链情况1红绿部分分离图.svg",
+      "comment": "有点复杂，后续再绘制",
+      "reviewed_at": "2026-08-05T02:25:39"
+    },
+    {
+      "id": "fig-096",
+      "desc": "情况1完成着色正方形着红色",
+      "original": "images/fig-096_情况1完成着色正方形着红色.jpg",
+      "svg": "images/fig-096_情况1完成着色正方形着红色.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:25:49"
+    },
+    {
+      "id": "fig-097",
+      "desc": "情况2蓝黄部分被切断示意图",
+      "original": "images/fig-097_情况2蓝黄部分被切断示意图.jpg",
+      "svg": "images/fig-097_情况2蓝黄部分被切断示意图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:25:52"
+    },
+    {
+      "id": "fig-098",
+      "desc": "肯普处理五边形P被五色包围图",
+      "original": "images/fig-098_肯普处理五边形P被五色包围图.jpg",
+      "svg": "images/fig-098_肯普处理五边形P被五色包围图.svg",
+      "comment": "紧密相邻。不需要外围虚线",
+      "reviewed_at": "2026-08-05T02:26:06"
+    },
+    {
+      "id": "fig-099",
+      "desc": "黄红部分交换后P着黄色图",
+      "original": "images/fig-099_黄红部分交换后P着黄色图.jpg",
+      "svg": "images/fig-099_黄红部分交换后P着黄色图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:13"
+    },
+    {
+      "id": "fig-100",
+      "desc": "红黄部分相连情况示意图",
+      "original": "images/fig-100_红黄部分相连情况示意图.jpg",
+      "svg": "images/fig-100_红黄部分相连情况示意图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:16"
+    },
+    {
+      "id": "fig-101",
+      "desc": "绿红部分交换后P着绿色图",
+      "original": "images/fig-101_绿红部分交换后P着绿色图.jpg",
+      "svg": "images/fig-101_绿红部分交换后P着绿色图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:23"
+    },
+    {
+      "id": "fig-102",
+      "desc": "绿红部分相连合并情况图",
+      "original": "images/fig-102_绿红部分相连合并情况图.jpg",
+      "svg": "images/fig-102_绿红部分相连合并情况图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:28"
+    },
+    {
+      "id": "fig-103",
+      "desc": "P右侧蓝黄部分颜色交换图",
+      "original": "images/fig-103_P右侧蓝黄部分颜色交换图.jpg",
+      "svg": "images/fig-103_P右侧蓝黄部分颜色交换图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:33"
+    },
+    {
+      "id": "fig-104",
+      "desc": "P左侧蓝绿部分颜色交换图",
+      "original": "images/fig-104_P左侧蓝绿部分颜色交换图.jpg",
+      "svg": "images/fig-104_P左侧蓝绿部分颜色交换图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:37"
+    },
+    {
+      "id": "fig-105",
+      "desc": "五边形P最终着蓝色完成图",
+      "original": "images/fig-105_五边形P最终着蓝色完成图.jpg",
+      "svg": "images/fig-105_五边形P最终着蓝色完成图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:26:39"
+    },
+    {
+      "id": "fig-128",
+      "desc": "立方体棱三色着色图",
+      "original": "images/fig-128_立方体棱三色着色图.jpg",
+      "svg": "images/fig-128_立方体棱三色着色图.svg",
+      "comment": "给线条加上字母",
+      "reviewed_at": "2026-08-05T02:29:17"
+    },
+    {
+      "id": "fig-132",
+      "desc": "哈密顿二十元游戏说明书图",
+      "original": "images/fig-132_哈密顿二十元游戏说明书图.jpg",
+      "svg": "images/fig-132_哈密顿二十元游戏说明书图.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:29:35"
+    },
+    {
+      "id": "fig-136",
+      "desc": "希伍德二十五国反例地图",
+      "original": "images/fig-136_希伍德二十五国反例地图.jpg",
+      "svg": "images/fig-136_希伍德二十五国反例地图.svg",
+      "comment": "要标上r和g，因为这是rg的反例",
+      "reviewed_at": "2026-08-05T02:30:28"
+    },
+    {
+      "id": "fig-137",
+      "desc": "蓝黄链分隔红绿部分图",
+      "original": "images/fig-137_蓝黄链分隔红绿部分图.jpg",
+      "svg": "images/fig-137_蓝黄链分隔红绿部分图.svg",
+      "comment": "是y和r的链条",
+      "reviewed_at": "2026-08-05T02:30:59"
+    },
+    {
+      "id": "fig-138",
+      "desc": "颜色互换图ab",
+      "original": "images/fig-138_颜色互换图ab.jpg",
+      "svg": "images/fig-138_颜色互换图ab.svg",
+      "comment": "后续再重绘",
+      "reviewed_at": "2026-08-05T02:31:07"
+    },
+    {
+      "id": "fig-139",
+      "desc": "颜色互换图cd",
+      "original": "images/fig-139_颜色互换图cd.jpg",
+      "svg": "images/fig-139_颜色互换图cd.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:31:22"
+    },
+    {
+      "id": "fig-140",
+      "desc": "同时互换两色导致冲突示意图",
+      "original": "images/fig-140_同时互换两色导致冲突示意图.jpg",
+      "svg": "images/fig-140_同时互换两色导致冲突示意图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:31:26"
+    },
+    {
+      "id": "fig-144",
+      "desc": "五色定理证明情况判定图",
+      "original": "images/fig-144_五色定理证明情况判定图.jpg",
+      "svg": "images/fig-144_五色定理证明情况判定图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:33:02"
+    },
+    {
+      "id": "fig-145",
+      "desc": "情况1五边形P着红色完成图",
+      "original": "images/fig-145_情况1五边形P着红色完成图.jpg",
+      "svg": "images/fig-145_情况1五边形P着红色完成图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:33:07"
+    },
+    {
+      "id": "fig-146",
+      "desc": "情况2五边形P着蓝色完成图",
+      "original": "images/fig-146_情况2五边形P着蓝色完成图.jpg",
+      "svg": "images/fig-146_情况2五边形P着蓝色完成图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:33:12"
+    },
+    {
+      "id": "fig-148",
+      "desc": "希伍德十二色帝国地图",
+      "original": "images/fig-148_希伍德十二色帝国地图.jpg",
+      "svg": "images/fig-148_希伍德十二色帝国地图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:33:51"
+    },
+    {
+      "id": "fig-149",
+      "desc": "泰勒十八色帝国地图",
+      "original": "images/fig-149_泰勒十八色帝国地图.jpg",
+      "svg": "images/fig-149_泰勒十八色帝国地图.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:33:56"
+    },
+    {
+      "id": "fig-150",
+      "desc": "环面上每国相邻地图示例",
+      "original": "images/fig-150_环面上每国相邻地图示例.jpg",
+      "svg": "images/fig-150_环面上每国相邻地图示例.svg",
+      "comment": "这图比较难表达，后续再重绘",
+      "reviewed_at": "2026-08-05T02:34:04"
+    },
+    {
+      "id": "fig-151",
+      "desc": "环面七色定理国家C示意图",
+      "original": "images/fig-151_环面七色定理国家C示意图.jpg",
+      "svg": "images/fig-151_环面七色定理国家C示意图.svg",
+      "comment": "正常区域图。把延申出去圆圈的线条删掉",
+      "reviewed_at": "2026-08-05T02:34:38"
+    },
+    {
+      "id": "fig-154",
+      "desc": "彼得森1898年原始绘图",
+      "original": "images/fig-154_彼得森1898年原始绘图.jpg",
+      "svg": "images/fig-154_彼得森1898年原始绘图.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:35:09"
+    },
+    {
+      "id": "fig-155",
+      "desc": "肯普早年版本彼得森图",
+      "original": "images/fig-155_肯普早年版本彼得森图.jpg",
+      "svg": "images/fig-155_肯普早年版本彼得森图.svg",
+      "comment": "历史原图",
+      "reviewed_at": "2026-08-05T02:35:24"
+    },
+    {
+      "id": "fig-159",
+      "desc": "不可避免集一二边形",
+      "original": "images/fig-159_不可避免集一二边形.jpg",
+      "svg": "images/fig-159_不可避免集一二边形.svg",
+      "comment": "还有一个虚线外面的圆包住了它",
+      "reviewed_at": "2026-08-05T02:36:22"
+    },
+    {
+      "id": "fig-160",
+      "desc": "不可避免集一三角形",
+      "original": "images/fig-160_不可避免集一三角形.jpg",
+      "svg": "images/fig-160_不可避免集一三角形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:36:32"
+    },
+    {
+      "id": "fig-161",
+      "desc": "不可避免集一四边形",
+      "original": "images/fig-161_不可避免集一四边形.jpg",
+      "svg": "images/fig-161_不可避免集一四边形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:36:36"
+    },
+    {
+      "id": "fig-162",
+      "desc": "不可避免集一五边形",
+      "original": "images/fig-162_不可避免集一五边形.jpg",
+      "svg": "images/fig-162_不可避免集一五边形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:36:39"
+    },
+    {
+      "id": "fig-163",
+      "desc": "不可避免集二二边形",
+      "original": "images/fig-163_不可避免集二二边形.jpg",
+      "svg": "images/fig-163_不可避免集二二边形.svg",
+      "comment": "和fig-159一样就行",
+      "reviewed_at": "2026-08-05T02:36:58"
+    },
+    {
+      "id": "fig-164",
+      "desc": "不可避免集二三角形",
+      "original": "images/fig-164_不可避免集二三角形.jpg",
+      "svg": "images/fig-164_不可避免集二三角形.svg",
+      "comment": "和160一样",
+      "reviewed_at": "2026-08-05T02:37:27"
+    },
+    {
+      "id": "fig-165",
+      "desc": "不可避免集二四边形",
+      "original": "images/fig-165_不可避免集二四边形.jpg",
+      "svg": "images/fig-165_不可避免集二四边形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:37:35"
+    },
+    {
+      "id": "fig-169",
+      "desc": "韦尼克不可避免集二边形",
+      "original": "images/fig-169_韦尼克不可避免集二边形.jpg",
+      "svg": "images/fig-169_韦尼克不可避免集二边形.svg",
+      "comment": "同159",
+      "reviewed_at": "2026-08-05T02:38:07"
+    },
+    {
+      "id": "fig-170",
+      "desc": "韦尼克不可避免集三角形",
+      "original": "images/fig-170_韦尼克不可避免集三角形.jpg",
+      "svg": "images/fig-170_韦尼克不可避免集三角形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:38:10"
+    },
+    {
+      "id": "fig-171",
+      "desc": "韦尼克不可避免集四边形",
+      "original": "images/fig-171_韦尼克不可避免集四边形.jpg",
+      "svg": "images/fig-171_韦尼克不可避免集四边形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:38:12"
+    },
+    {
+      "id": "fig-177",
+      "desc": "勒贝格不可避免集三角形",
+      "original": "images/fig-177_勒贝格不可避免集三角形.jpg",
+      "svg": "images/fig-177_勒贝格不可避免集三角形.svg",
+      "comment": "同160",
+      "reviewed_at": "2026-08-05T02:38:42"
+    },
+    {
+      "id": "fig-178",
+      "desc": "勒贝格不可避免集四边形",
+      "original": "images/fig-178_勒贝格不可避免集四边形.jpg",
+      "svg": "images/fig-178_勒贝格不可避免集四边形.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:38:45"
+    },
+    {
+      "id": "fig-183",
+      "desc": "四国环已着色内部地图",
+      "original": "images/fig-183_四国环已着色内部地图.jpg",
+      "svg": "images/fig-183_四国环已着色内部地图.svg",
+      "comment": "内部用字母",
+      "reviewed_at": "2026-08-05T02:39:42"
+    },
+    {
+      "id": "fig-184",
+      "desc": "四国环已着色外部地图",
+      "original": "images/fig-184_四国环已着色外部地图.jpg",
+      "svg": "images/fig-184_四国环已着色外部地图.svg",
+      "comment": "外环用字母，以强调已着色的内环",
+      "reviewed_at": "2026-08-05T02:40:04"
+    },
+    {
+      "id": "fig-185",
+      "desc": "四国环重新着色的外部地图",
+      "original": "images/fig-185_四国环重新着色的外部地图.jpg",
+      "svg": "images/fig-185_四国环重新着色的外部地图.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:40:11"
+    },
+    {
+      "id": "fig-187",
+      "desc": "无法直接匹配的环着色地图",
+      "original": "images/fig-187_无法直接匹配的环着色地图.jpg",
+      "svg": "images/fig-187_无法直接匹配的环着色地图.svg",
+      "comment": "四个区域中间是打通的",
+      "reviewed_at": "2026-08-05T02:40:54"
+    },
+    {
+      "id": "fig-188",
+      "desc": "已着色的内部地图第二例",
+      "original": "images/fig-188_已着色的内部地图第二例.jpg",
+      "svg": "images/fig-188_已着色的内部地图第二例.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:41:04"
+    },
+    {
+      "id": "fig-189",
+      "desc": "已着色的外部地图第二例",
+      "original": "images/fig-189_已着色的外部地图第二例.jpg",
+      "svg": "images/fig-189_已着色的外部地图第二例.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:41:10"
+    },
+    {
+      "id": "fig-205",
+      "desc": "环大小14八国构形示意图",
+      "original": "images/fig-205_环大小14八国构形示意图.jpg",
+      "svg": "images/fig-205_环大小14八国构形示意图.svg",
+      "comment": "内环着色；是正常图形；无需在图形内部又画图案",
+      "reviewed_at": "2026-08-05T02:42:52"
+    },
+    {
+      "id": "fig-206",
+      "desc": "黑施四符号及对应国家构形图",
+      "original": "images/fig-206_黑施四符号及对应国家构形图.jpg",
+      "svg": "images/fig-206_黑施四符号及对应国家构形图.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:42:59"
+    },
+    {
+      "id": "fig-208",
+      "desc": "岛本马蹄构型图",
+      "original": "images/fig-208_岛本马蹄构型图.jpg",
+      "svg": "images/fig-208_岛本马蹄构型图.svg",
+      "comment": "同206意见",
+      "reviewed_at": "2026-08-05T02:43:12"
+    },
+    {
+      "id": "fig-211",
+      "desc": "黑施障碍四足国家示意图",
+      "original": "images/fig-211_黑施障碍四足国家示意图.jpg",
+      "svg": "images/fig-211_黑施障碍四足国家示意图.svg",
+      "comment": "没有外面的环；最外侧是虚线",
+      "reviewed_at": "2026-08-05T02:43:50"
+    },
+    {
+      "id": "fig-212",
+      "desc": "黑施障碍三足铰接国家示意图",
+      "original": "images/fig-212_黑施障碍三足铰接国家示意图.jpg",
+      "svg": "images/fig-212_黑施障碍三足铰接国家示意图.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:43:36"
+    },
+    {
+      "id": "fig-213",
+      "desc": "黑施障碍悬挂5-5对示意图",
+      "original": "images/fig-213_黑施障碍悬挂5-5对示意图.jpg",
+      "svg": "images/fig-213_黑施障碍悬挂5-5对示意图.svg",
+      "comment": "同上",
+      "reviewed_at": "2026-08-05T02:43:55"
+    }
+  ],
+  "approved": [
+    "fig-001",
+    "fig-002",
+    "fig-003",
+    "fig-005",
+    "fig-007",
+    "fig-008",
+    "fig-009",
+    "fig-010",
+    "fig-013",
+    "fig-016",
+    "fig-017",
+    "fig-030",
+    "fig-034",
+    "fig-035",
+    "fig-036",
+    "fig-037",
+    "fig-046",
+    "fig-058",
+    "fig-063",
+    "fig-064",
+    "fig-065",
+    "fig-067",
+    "fig-069",
+    "fig-070",
+    "fig-071",
+    "fig-072",
+    "fig-073",
+    "fig-074",
+    "fig-076",
+    "fig-080",
+    "fig-081",
+    "fig-083",
+    "fig-084",
+    "fig-085",
+    "fig-086",
+    "fig-087",
+    "fig-088",
+    "fig-089",
+    "fig-090",
+    "fig-091",
+    "fig-092",
+    "fig-106",
+    "fig-107",
+    "fig-108",
+    "fig-109",
+    "fig-110",
+    "fig-111",
+    "fig-112",
+    "fig-113",
+    "fig-114",
+    "fig-115",
+    "fig-116",
+    "fig-117",
+    "fig-118",
+    "fig-119",
+    "fig-120",
+    "fig-121",
+    "fig-122",
+    "fig-123",
+    "fig-124",
+    "fig-125",
+    "fig-126",
+    "fig-127",
+    "fig-129",
+    "fig-130",
+    "fig-131",
+    "fig-133",
+    "fig-134",
+    "fig-135",
+    "fig-141",
+    "fig-142",
+    "fig-143",
+    "fig-147",
+    "fig-152",
+    "fig-153",
+    "fig-156",
+    "fig-157",
+    "fig-158",
+    "fig-166",
+    "fig-167",
+    "fig-168",
+    "fig-172",
+    "fig-173",
+    "fig-174",
+    "fig-175",
+    "fig-176",
+    "fig-179",
+    "fig-180",
+    "fig-181",
+    "fig-182",
+    "fig-186",
+    "fig-190",
+    "fig-191",
+    "fig-192",
+    "fig-193",
+    "fig-194",
+    "fig-195",
+    "fig-196",
+    "fig-197",
+    "fig-198",
+    "fig-199",
+    "fig-200",
+    "fig-201",
+    "fig-202",
+    "fig-203",
+    "fig-204",
+    "fig-207",
+    "fig-209",
+    "fig-210",
+    "fig-214",
+    "fig-215",
+    "fig-216",
+    "fig-217"
+  ],
+  "pending": []
+}

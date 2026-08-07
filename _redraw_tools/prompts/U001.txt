@@ -1,0 +1,21 @@
+# 重绘任务 U001（章节：前言 / ）
+
+项目目录（工作目录）：
+D:\0-code\0-python\FourColorTheorem\proof\papers\《四色足矣：四色猜想是如何解决的》（Robin Wilson）
+
+## 第一步
+阅读 `_redraw_tools/GUIDE.md`（统一设计规范，技术栈、配色、输出要求都在里面，必须遵守）。
+
+## 本单元要重绘的图（共 1 张）
+- fig-003  原文件名: fig-003_不列颠郡县四色地图.jpg  描述: 不列颠郡县四色地图  初步分类: real_map
+
+## 这些图所在的正文原文（用于理解图的具体内容、判断逻辑链条、确定标签/颜色/邻接关系）
+```
+
+```
+
+## 你要做的事
+1. 读 GUIDE.md 和上面的正文，必要时用 Read 工具打开 `images/` 目录下对应的原始 .jpg 看一眼原图构图（原图可能模糊但能看出大致布局）。
+2. 用 Python（matplotlib，可复用 `_redraw_tools/polyhedra.py` 和 `_redraw_tools/solids.py`）为每一张图生成清晰的 SVG。
+3. 把每张 SVG 保存到 `images/` 目录，文件名把对应原文件名的 `.jpg` 换成 `.svg`，其余不变（例如 `fig-003_不列颠郡县四色地图.jpg` → `fig-003_不列颠郡县四色地图.svg`）。
+4. 完成后，用几句话总结：画了哪些图、做了什么内容判断、有没有拿不准的地方。不要修改 GUIDE.md、polyhedra.py、solids.py、work_units.json、或 FourColors_Suffice_zh.md。

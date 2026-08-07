@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>《四色足矣》插图校对台</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui,"Microsoft YaHei",sans-serif; background:#f4f4f2; color:#222; }
+header { position:sticky; top:0; z-index:10; background:#2f3640; color:#fff; padding:8px 14px;
+         display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+header h1 { font-size:15px; margin:0; font-weight:600; }
+.stat { font-size:13px; opacity:.9; }
+.stat b { color:#7bd88f; } .stat i { color:#ffcc66; font-style:normal; } .stat s { color:#aaa; text-decoration:none; }
+button { font:inherit; padding:5px 12px; border:1px solid #999; background:#fff; border-radius:4px; cursor:pointer; }
+button:hover { background:#eee; }
+header button { background:#4a5568; color:#fff; border-color:#666; }
+header button:hover { background:#5a6578; }
+header button.on { background:#7bd88f; color:#222; border-color:#7bd88f; }
+
+#bar { height:5px; background:#555; }
+#bar > div { height:100%; background:#7bd88f; width:0; transition:width .2s; }
+
+main { display:flex; height:calc(100vh - 52px); }
+#list { width:210px; overflow-y:auto; background:#fff; border-right:1px solid #ddd; flex:none; }
+#list div { padding:5px 9px; font-size:12px; cursor:pointer; border-bottom:1px solid #f0f0f0;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#list div:hover { background:#f0f4f8; }
+#list div.cur { background:#dbe9f7; font-weight:600; }
+#list div.ok { border-left:4px solid #4caf50; }
+#list div.fix { border-left:4px solid #ff9800; }
+#list div.todo { border-left:4px solid #ccc; }
+#list div.nosvg { color:#999; }
+
+#work { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+#pair { flex:1; display:flex; gap:8px; padding:8px; overflow:hidden; }
+.pane { flex:1; display:flex; flex-direction:column; background:#fff; border:1px solid #ddd; overflow:hidden; }
+.pane h2 { margin:0; font-size:12px; padding:4px 8px; background:#eee; border-bottom:1px solid #ddd; font-weight:600; }
+.pane .box { flex:1; display:flex; align-items:center; justify-content:center; overflow:auto; padding:6px; }
+.pane img { max-width:100%; max-height:100%; object-fit:contain; cursor:zoom-in; }
+.pane .none { color:#aaa; font-size:14px; }
+#ctl { padding:8px 12px; background:#fff; border-top:1px solid #ddd; }
+#title { font-size:13px; margin-bottom:6px; }
+#title b { font-size:15px; }
+#row { display:flex; gap:8px; align-items:flex-start; }
+#cmt { flex:1; min-height:52px; font:inherit; font-size:13px; padding:5px; border:1px solid #bbb; border-radius:4px; resize:vertical; }
+#btns { display:flex; flex-direction:column; gap:5px; flex:none; }
+#pass { background:#4caf50; color:#fff; border-color:#4caf50; font-weight:600; }
+#fix  { background:#ff9800; color:#fff; border-color:#ff9800; font-weight:600; }
+#nav { display:flex; gap:5px; margin-top:5px; }
+#nav button { flex:1; font-size:12px; padding:3px; }
+.hint { font-size:11px; color:#888; margin-top:5px; }
+#done { display:none; padding:10px 14px; background:#e8f5e9; border-top:2px solid #4caf50; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>《四色足矣》插图校对台</h1>
+  <span class="stat">共 <span id="n-all"></span> · 通过 <b id="n-ok">0</b> · 待改 <i id="n-fix">0</i> · 未审 <s id="n-todo">0</s></span>
+  <button id="f-all" class="on">全部</button>
+  <button id="f-todo">仅未审</button>
+  <button id="f-fix">仅待改</button>
+  <button id="f-nosvg">仅无新图</button>
+  <button id="exp">导出 JSON</button>
+  <button id="rst">清空进度</button>
+</header>
+<div id="bar"><div></div></div>
+
+<main>
+  <div id="list"></div>
+  <div id="work">
+    <div id="pair">
+      <div class="pane"><h2>原图</h2><div class="box" id="box-o"></div></div>
+      <div class="pane"><h2>新图（SVG）</h2><div class="box" id="box-n"></div></div>
+    </div>
+    <div id="ctl">
+      <div id="title"></div>
+      <div id="row">
+        <textarea id="cmt" placeholder="修改意见（选「按意见调整」时填写，会写进导出的 JSON 供 AI 照着改）"></textarea>
+        <div id="btns">
+          <button id="pass">✓ 通过 (A)</button>
+          <button id="fix">✎ 按意见调整 (S)</button>
+          <div id="nav">
+            <button id="prev">← 上一张</button>
+            <button id="next">下一张 →</button>
+          </div>
+        </div>
+      </div>
+      <div class="hint">快捷键：← → 翻页 · A 通过 · S 记录意见 · 点图可放大（新标签页打开）</div>
+    </div>
+    <div id="done"></div>
+  </div>
+</main>
+
+<script>
+const ITEMS = [{"id":"fig-001","desc":"封面题图彩色地图","orig":"fig-001_封面题图彩色地图.jpg","svg":""},{"id":"fig-002","desc":"弗朗西斯·格思里肖像","orig":"fig-002_弗朗西斯·格思里肖像.jpg","svg":""},{"id":"fig-003","desc":"不列颠郡县四色地图","orig":"fig-003_不列颠郡县四色地图.jpg","svg":"fig-003_不列颠郡县四色地图.svg"},{"id":"fig-004","desc":"国家A与B相邻示意图","orig":"fig-004_国家A与B相邻示意图.jpg","svg":"fig-004_国家A与B相邻示意图.svg"},{"id":"fig-005","desc":"四国互邻需四色示意图a","orig":"fig-005_四国互邻需四色示意图a.jpg","svg":"fig-005_四国互邻需四色示意图a.svg"},{"id":"fig-006","desc":"比利时法国德国卢森堡地图","orig":"fig-006_比利时法国德国卢森堡地图.jpg","svg":"fig-006_比利时法国德国卢森堡地图.svg"},{"id":"fig-007","desc":"外圈两色中心三色地图示例","orig":"fig-007_外圈两色中心三色地图示例.jpg","svg":"fig-007_外圈两色中心三色地图示例.svg"},{"id":"fig-008","desc":"外圈五国需四色地图示例","orig":"fig-008_外圈五国需四色地图示例.jpg","svg":"fig-008_外圈五国需四色地图示例.svg"},{"id":"fig-009","desc":"美国本土48州四色地图","orig":"fig-009_美国本土48州四色地图.jpg","svg":"fig-009_美国本土48州四色地图.svg"},{"id":"fig-010","desc":"八块馅饼地图两色示例","orig":"fig-010_八块馅饼地图两色示例.jpg","svg":"fig-010_八块馅饼地图两色示例.svg"},{"id":"fig-011","desc":"分裂国家标注区域1地图","orig":"fig-011_分裂国家标注区域1地图.jpg","svg":"fig-011_分裂国家标注区域1地图.svg"},{"id":"fig-012","desc":"分裂国家五色着色结果","orig":"fig-012_分裂国家五色着色结果.jpg","svg":"fig-012_分裂国家五色着色结果.svg"},{"id":"fig-013","desc":"外部区域视为环形国家示意图","orig":"fig-013_外部区域视为环形国家示意图.jpg","svg":"fig-013_外部区域视为环形国家示意图.svg"},{"id":"fig-014","desc":"地图画在球面上示意图","orig":"fig-014_地图画在球面上示意图.jpg","svg":"fig-014_地图画在球面上示意图.svg"},{"id":"fig-015","desc":"球极投影示意图","orig":"fig-015_球极投影示意图.jpg","svg":"fig-015_球极投影示意图.svg"},{"id":"fig-016","desc":"由两个以上分块组成的地图","orig":"fig-016_由两个以上分块组成的地图.jpg","svg":"fig-016_由两个以上分块组成的地图.svg"},{"id":"fig-017","desc":"由部分在点上连接而成的地图","orig":"fig-017_由部分在点上连接而成的地图.jpg","svg":"fig-017_由部分在点上连接而成的地图.svg"},{"id":"fig-018","desc":"只有一个边界线的国家","orig":"fig-018_只有一个边界线的国家.jpg","svg":"fig-018_只有一个边界线的国家.svg"},{"id":"fig-019","desc":"交汇点两边界线移除示意图","orig":"fig-019_交汇点两边界线移除示意图.jpg","svg":"fig-019_交汇点两边界线移除示意图.svg"},{"id":"fig-020","desc":"三次图四色着色练习地图","orig":"fig-020_三次图四色着色练习地图.jpg","svg":"fig-020_三次图四色着色练习地图.svg"},{"id":"fig-021","desc":"例1三国已着色待完成地图","orig":"fig-021_例1三国已着色待完成地图.jpg","svg":"fig-021_例1三国已着色待完成地图.svg"},{"id":"fig-022","desc":"例1国家A着蓝色尝试着色","orig":"fig-022_例1国家A着蓝色尝试着色.jpg","svg":"fig-022_例1国家A着蓝色尝试着色.svg"},{"id":"fig-023","desc":"例1国家A着红色尝试着色","orig":"fig-023_例1国家A着红色尝试着色.jpg","svg":"fig-023_例1国家A着红色尝试着色.svg"},{"id":"fig-024","desc":"例1完成后的四色着色","orig":"fig-024_例1完成后的四色着色.jpg","svg":"fig-024_例1完成后的四色着色.svg"},{"id":"fig-025","desc":"麦格雷戈110区域愚人节地图","orig":"fig-025_麦格雷戈110区域愚人节地图.jpg","svg":"fig-025_麦格雷戈110区域愚人节地图.svg"},{"id":"fig-026","desc":"德摩根信中学生四色示例图","orig":"fig-026_德摩根信中学生四色示例图.jpg","svg":""},{"id":"fig-027","desc":"弗朗西斯·格思里关键图示","orig":"fig-027_弗朗西斯·格思里关键图示.jpg","svg":""},{"id":"fig-028","desc":"弗雷德里克五根棒三维例子","orig":"fig-028_弗雷德里克五根棒三维例子.jpg","svg":""},{"id":"fig-029","desc":"蒂策n5三维棒构造例子","orig":"fig-029_蒂策n5三维棒构造例子.jpg","svg":""},{"id":"fig-030","desc":"奥古斯塔斯·德摩根肖像","orig":"fig-030_奥古斯塔斯·德摩根肖像.jpg","svg":""},{"id":"fig-031","desc":"德摩根致哈密顿信三隔间图示","orig":"fig-031_德摩根致哈密顿信三隔间图示.jpg","svg":""},{"id":"fig-032","desc":"德摩根致休厄尔信四隔间公理图示","orig":"fig-032_德摩根致休厄尔信四隔间公理图示.jpg","svg":""},{"id":"fig-033","desc":"环面七国相邻地图","orig":"fig-033_环面七国相邻地图.jpg","svg":"fig-033_环面七国相邻地图.svg"},{"id":"fig-034","desc":"莫比乌斯带构造示意图","orig":"fig-034_莫比乌斯带构造示意图.jpg","svg":"fig-034_莫比乌斯带构造示意图.svg"},{"id":"fig-035","desc":"奥古斯特·费迪南德·莫比乌斯肖像","orig":"fig-035_奥古斯特·费迪南德·莫比乌斯肖像.jpg","svg":""},{"id":"fig-036","desc":"五位王子问题图a三区域共边","orig":"fig-036_五位王子问题图a三区域共边.jpg","svg":"fig-036_五位王子问题图a三区域共边.svg"},{"id":"fig-037","desc":"五位王子问题图b区域D在内","orig":"fig-037_五位王子问题图b区域D在内.jpg","svg":"fig-037_五位王子问题图b区域D在内.svg"},{"id":"fig-038","desc":"五位王子问题图c区域D在外","orig":"fig-038_五位王子问题图c区域D在外.jpg","svg":"fig-038_五位王子问题图c区域D在外.svg"},{"id":"fig-039","desc":"五座宫殿问题图a三宫殿连接","orig":"fig-039_五座宫殿问题图a三宫殿连接.jpg","svg":"fig-039_五座宫殿问题图a三宫殿连接.svg"},{"id":"fig-040","desc":"五座宫殿问题图b宫殿D在内","orig":"fig-040_五座宫殿问题图b宫殿D在内.jpg","svg":"fig-040_五座宫殿问题图b宫殿D在内.svg"},{"id":"fig-041","desc":"五座宫殿问题图c宫殿D在外","orig":"fig-041_五座宫殿问题图c宫殿D在外.jpg","svg":"fig-041_五座宫殿问题图c宫殿D在外.svg"},{"id":"fig-042","desc":"区域与宫殿叠加图示","orig":"fig-042_区域与宫殿叠加图示.jpg","svg":"fig-042_区域与宫殿叠加图示.svg"},{"id":"fig-043","desc":"D和E未连接图示","orig":"fig-043_D和E未连接图示.jpg","svg":"fig-043_D和E未连接图示.svg"},{"id":"fig-044","desc":"D和E用桥连接图示","orig":"fig-044_D和E用桥连接图示.jpg","svg":"fig-044_D和E用桥连接图示.svg"},{"id":"fig-045","desc":"环面划分七个相邻区域示意图","orig":"fig-045_环面划分七个相邻区域示意图.jpg","svg":"fig-045_环面划分七个相邻区域示意图.svg"},{"id":"fig-046","desc":"莱昂哈德·欧拉肖像","orig":"fig-046_莱昂哈德·欧拉肖像.jpg","svg":""},{"id":"fig-047","desc":"立方体与四棱锥示意图","orig":"fig-047_立方体与四棱锥示意图.jpg","svg":"fig-047_立方体与四棱锥示意图.svg"},{"id":"fig-048","desc":"正四面体","orig":"fig-048_正四面体.jpg","svg":"fig-048_正四面体.svg"},{"id":"fig-049","desc":"立方体","orig":"fig-049_立方体.jpg","svg":"fig-049_立方体.svg"},{"id":"fig-050","desc":"正八面体","orig":"fig-050_正八面体.jpg","svg":"fig-050_正八面体.svg"},{"id":"fig-051","desc":"正十二面体","orig":"fig-051_正十二面体.jpg","svg":"fig-051_正十二面体.svg"},{"id":"fig-052","desc":"正二十面体","orig":"fig-052_正二十面体.jpg","svg":"fig-052_正二十面体.svg"},{"id":"fig-053","desc":"棱柱","orig":"fig-053_棱柱.jpg","svg":"fig-053_棱柱.svg"},{"id":"fig-054","desc":"反棱柱","orig":"fig-054_反棱柱.jpg","svg":"fig-054_反棱柱.svg"},{"id":"fig-055","desc":"截半立方体","orig":"fig-055_截半立方体.jpg","svg":"fig-055_截半立方体.svg"},{"id":"fig-056","desc":"截角八面体","orig":"fig-056_截角八面体.jpg","svg":"fig-056_截角八面体.svg"},{"id":"fig-057","desc":"截角二十面体","orig":"fig-057_截角二十面体.jpg","svg":"fig-057_截角二十面体.svg"},{"id":"fig-058","desc":"大斜方截半立方体","orig":"fig-058_大斜方截半立方体.jpg","svg":"fig-058_大斜方截半立方体.svg"},{"id":"fig-059","desc":"C30巴基球","orig":"fig-059_C30巴基球.jpg","svg":"fig-059_C30巴基球.svg"},{"id":"fig-060","desc":"C60巴基球","orig":"fig-060_C60巴基球.jpg","svg":"fig-060_C60巴基球.svg"},{"id":"fig-061","desc":"足球","orig":"fig-061_足球.jpg","svg":"fig-061_足球.svg"},{"id":"fig-062","desc":"立方体投影到平面示意图","orig":"fig-062_立方体投影到平面示意图.jpg","svg":"fig-062_立方体投影到平面示意图.svg"},{"id":"fig-063","desc":"正十二面体立体与投影对照图","orig":"fig-063_正十二面体立体与投影对照图.jpg","svg":"fig-063_正十二面体立体与投影对照图.svg"},{"id":"fig-064","desc":"多面体投影对应地图示意图","orig":"fig-064_多面体投影对应地图示意图.jpg","svg":"fig-064_多面体投影对应地图示意图.svg"},{"id":"fig-065","desc":"移除分隔两面的边示意图","orig":"fig-065_移除分隔两面的边示意图.jpg","svg":"fig-065_移除分隔两面的边示意图.svg"},{"id":"fig-066","desc":"移除悬垂边示意图","orig":"fig-066_移除悬垂边示意图.jpg","svg":"fig-066_移除悬垂边示意图.svg"},{"id":"fig-067","desc":"四面体逐步移除边过程图","orig":"fig-067_四面体逐步移除边过程图.jpg","svg":"fig-067_四面体逐步移除边过程图.svg"},{"id":"fig-068","desc":"吕利耶单孔立方体多面体图","orig":"fig-068_吕利耶单孔立方体多面体图.jpg","svg":"fig-068_吕利耶单孔立方体多面体图.svg"},{"id":"fig-069","desc":"二边形","orig":"fig-069_二边形.jpg","svg":"fig-069_二边形.svg"},{"id":"fig-070","desc":"三角形","orig":"fig-070_三角形.jpg","svg":"fig-070_三角形.svg"},{"id":"fig-071","desc":"正方形","orig":"fig-071_正方形.jpg","svg":"fig-071_正方形.svg"},{"id":"fig-072","desc":"五边形","orig":"fig-072_五边形.jpg","svg":"fig-072_五边形.svg"},{"id":"fig-073","desc":"计数公式示例三次地图","orig":"fig-073_计数公式示例三次地图.jpg","svg":"fig-073_计数公式示例三次地图.svg"},{"id":"fig-074","desc":"截角二十面体十二个五边形示意图","orig":"fig-074_截角二十面体十二个五边形示意图.jpg","svg":"fig-074_截角二十面体十二个五边形示意图.svg"},{"id":"fig-075","desc":"截角八面体六个正方形示意图","orig":"fig-075_截角八面体六个正方形示意图.jpg","svg":"fig-075_截角八面体六个正方形示意图.svg"},{"id":"fig-076","desc":"阿瑟·凯莱肖像","orig":"fig-076_阿瑟·凯莱肖像.jpg","svg":""},{"id":"fig-077","desc":"新区域被四色包围无法着色图","orig":"fig-077_新区域被四色包围无法着色图.jpg","svg":"fig-077_新区域被四色包围无法着色图.svg"},{"id":"fig-078","desc":"交汇点补丁化为三次图示意","orig":"fig-078_交汇点补丁化为三次图示意.jpg","svg":"fig-078_交汇点补丁化为三次图示意.svg"},{"id":"fig-079","desc":"添加环形国家限外边界三色图","orig":"fig-079_添加环形国家限外边界三色图.jpg","svg":"fig-079_添加环形国家限外边界三色图.svg"},{"id":"fig-080","desc":"多米诺骨牌归纳法比喻示意图","orig":"fig-080_多米诺骨牌归纳法比喻示意图.jpg","svg":"fig-080_多米诺骨牌归纳法比喻示意图.svg"},{"id":"fig-081","desc":"着色直接扩展示例地图","orig":"fig-081_着色直接扩展示例地图.jpg","svg":"fig-081_着色直接扩展示例地图.svg"},{"id":"fig-082","desc":"着色重新着色扩展示例地图","orig":"fig-082_着色重新着色扩展示例地图.jpg","svg":"fig-082_着色重新着色扩展示例地图.svg"},{"id":"fig-083","desc":"待扩展着色练习地图","orig":"fig-083_待扩展着色练习地图.jpg","svg":"fig-083_待扩展着色练习地图.svg"},{"id":"fig-084","desc":"最小罪犯含二边形示意图","orig":"fig-084_最小罪犯含二边形示意图.jpg","svg":"fig-084_最小罪犯含二边形示意图.svg"},{"id":"fig-085","desc":"最小罪犯含三角形示意图","orig":"fig-085_最小罪犯含三角形示意图.jpg","svg":"fig-085_最小罪犯含三角形示意图.svg"},{"id":"fig-086","desc":"最小罪犯含正方形示意图","orig":"fig-086_最小罪犯含正方形示意图.jpg","svg":"fig-086_最小罪犯含正方形示意图.svg"},{"id":"fig-087","desc":"最小罪犯含五边形示意图","orig":"fig-087_最小罪犯含五边形示意图.jpg","svg":"fig-087_最小罪犯含五边形示意图.svg"},{"id":"fig-088","desc":"六色定理证明国家C示意图","orig":"fig-088_六色定理证明国家C示意图.jpg","svg":"fig-088_六色定理证明国家C示意图.svg"},{"id":"fig-089","desc":"詹姆斯·约瑟夫·西尔维斯特肖像","orig":"fig-089_詹姆斯·约瑟夫·西尔维斯特肖像.jpg","svg":""},{"id":"fig-090","desc":"肯普论文相关书影插图","orig":"fig-090_肯普论文相关书影插图.jpg","svg":"fig-090_肯普论文相关书影插图.svg"},{"id":"fig-091","desc":"阿尔弗雷德·布雷·肯普肖像","orig":"fig-091_阿尔弗雷德·布雷·肯普肖像.jpg","svg":""},{"id":"fig-092","desc":"肯普补丁法边界线延伸示意图","orig":"fig-092_肯普补丁法边界线延伸示意图.jpg","svg":"fig-092_肯普补丁法边界线延伸示意图.svg"},{"id":"fig-093","desc":"三角形恢复着色成功示意图","orig":"fig-093_三角形恢复着色成功示意图.jpg","svg":"fig-093_三角形恢复着色成功示意图.svg"},{"id":"fig-094","desc":"正方形五边形被四色包围无备用色图","orig":"fig-094_正方形五边形被四色包围无备用色图.jpg","svg":"fig-094_正方形五边形被四色包围无备用色图.svg"},{"id":"fig-095","desc":"肯普链情况1红绿部分分离图","orig":"fig-095_肯普链情况1红绿部分分离图.jpg","svg":"fig-095_肯普链情况1红绿部分分离图.svg"},{"id":"fig-096","desc":"情况1完成着色正方形着红色","orig":"fig-096_情况1完成着色正方形着红色.jpg","svg":"fig-096_情况1完成着色正方形着红色.svg"},{"id":"fig-097","desc":"情况2蓝黄部分被切断示意图","orig":"fig-097_情况2蓝黄部分被切断示意图.jpg","svg":"fig-097_情况2蓝黄部分被切断示意图.svg"},{"id":"fig-098","desc":"肯普处理五边形P被五色包围图","orig":"fig-098_肯普处理五边形P被五色包围图.jpg","svg":"fig-098_肯普处理五边形P被五色包围图.svg"},{"id":"fig-099","desc":"黄红部分交换后P着黄色图","orig":"fig-099_黄红部分交换后P着黄色图.jpg","svg":"fig-099_黄红部分交换后P着黄色图.svg"},{"id":"fig-100","desc":"红黄部分相连情况示意图","orig":"fig-100_红黄部分相连情况示意图.jpg","svg":"fig-100_红黄部分相连情况示意图.svg"},{"id":"fig-101","desc":"绿红部分交换后P着绿色图","orig":"fig-101_绿红部分交换后P着绿色图.jpg","svg":"fig-101_绿红部分交换后P着绿色图.svg"},{"id":"fig-102","desc":"绿红部分相连合并情况图","orig":"fig-102_绿红部分相连合并情况图.jpg","svg":"fig-102_绿红部分相连合并情况图.svg"},{"id":"fig-103","desc":"P右侧蓝黄部分颜色交换图","orig":"fig-103_P右侧蓝黄部分颜色交换图.jpg","svg":"fig-103_P右侧蓝黄部分颜色交换图.svg"},{"id":"fig-104","desc":"P左侧蓝绿部分颜色交换图","orig":"fig-104_P左侧蓝绿部分颜色交换图.jpg","svg":"fig-104_P左侧蓝绿部分颜色交换图.svg"},{"id":"fig-105","desc":"五边形P最终着蓝色完成图","orig":"fig-105_五边形P最终着蓝色完成图.jpg","svg":"fig-105_五边形P最终着蓝色完成图.svg"},{"id":"fig-106","desc":"肯普论文美国数学杂志图示","orig":"fig-106_肯普论文美国数学杂志图示.jpg","svg":""},{"id":"fig-107","desc":"三色地图特例偶数邻居示意图","orig":"fig-107_三色地图特例偶数邻居示意图.jpg","svg":"fig-107_三色地图特例偶数邻居示意图.svg"},{"id":"fig-108","desc":"两色地图三圆相交示意图","orig":"fig-108_两色地图三圆相交示意图.jpg","svg":"fig-108_两色地图三圆相交示意图.svg"},{"id":"fig-109","desc":"澳大利亚地图对偶图连杆机构图","orig":"fig-109_澳大利亚地图对偶图连杆机构图.jpg","svg":"fig-109_澳大利亚地图对偶图连杆机构图.svg"},{"id":"fig-110","desc":"彼得·格思里·泰特肖像","orig":"fig-110_彼得·格思里·泰特肖像.jpg","svg":""},{"id":"fig-111","desc":"泰特三角化图示意图","orig":"fig-111_泰特三角化图示意图.jpg","svg":"fig-111_泰特三角化图示意图.svg"},{"id":"fig-112","desc":"泰特两种字母标记叠加图","orig":"fig-112_泰特两种字母标记叠加图.jpg","svg":"fig-112_泰特两种字母标记叠加图.svg"},{"id":"fig-113","desc":"三次地图边界线三色着色示意图","orig":"fig-113_三次地图边界线三色着色示意图.jpg","svg":"fig-113_三次地图边界线三色着色示意图.svg"},{"id":"fig-114","desc":"双色边界线闭合环路示意图","orig":"fig-114_双色边界线闭合环路示意图.jpg","svg":"fig-114_双色边界线闭合环路示意图.svg"},{"id":"fig-115","desc":"泰特构造用地图","orig":"fig-115_泰特构造用地图.jpg","svg":"fig-115_泰特构造用地图.svg"},{"id":"fig-116","desc":"α-β环路图","orig":"fig-116_α-β环路图.jpg","svg":"fig-116_α-β环路图.svg"},{"id":"fig-117","desc":"α-γ环路图","orig":"fig-117_α-γ环路图.jpg","svg":"fig-117_α-γ环路图.svg"},{"id":"fig-118","desc":"环路叠加结果图","orig":"fig-118_环路叠加结果图.jpg","svg":"fig-118_环路叠加结果图.svg"},{"id":"fig-119","desc":"八点十二线三色边着色图","orig":"fig-119_八点十二线三色边着色图.jpg","svg":"fig-119_八点十二线三色边着色图.svg"},{"id":"fig-120","desc":"α线示意图","orig":"fig-120_α线示意图.jpg","svg":"fig-120_α线示意图.svg"},{"id":"fig-121","desc":"β线示意图","orig":"fig-121_β线示意图.jpg","svg":"fig-121_β线示意图.svg"},{"id":"fig-122","desc":"γ线示意图","orig":"fig-122_γ线示意图.jpg","svg":"fig-122_γ线示意图.svg"},{"id":"fig-123","desc":"十四点二十一线反例图","orig":"fig-123_十四点二十一线反例图.jpg","svg":"fig-123_十四点二十一线反例图.svg"},{"id":"fig-124","desc":"十二面体哈密顿回路图","orig":"fig-124_十二面体哈密顿回路图.jpg","svg":"fig-124_十二面体哈密顿回路图.svg"},{"id":"fig-125","desc":"截角八面体哈密顿回路图","orig":"fig-125_截角八面体哈密顿回路图.jpg","svg":"fig-125_截角八面体哈密顿回路图.svg"},{"id":"fig-126","desc":"立方体棱图","orig":"fig-126_立方体棱图.jpg","svg":"fig-126_立方体棱图.svg"},{"id":"fig-127","desc":"立方体哈密顿环路图","orig":"fig-127_立方体哈密顿环路图.jpg","svg":"fig-127_立方体哈密顿环路图.svg"},{"id":"fig-128","desc":"立方体棱三色着色图","orig":"fig-128_立方体棱三色着色图.jpg","svg":"fig-128_立方体棱三色着色图.svg"},{"id":"fig-129","desc":"托马斯·彭宁顿·柯克曼肖像","orig":"fig-129_托马斯·彭宁顿·柯克曼肖像.jpg","svg":""},{"id":"fig-130","desc":"柯克曼十三面体蜂窝投影图","orig":"fig-130_柯克曼十三面体蜂窝投影图.jpg","svg":"fig-130_柯克曼十三面体蜂窝投影图.svg"},{"id":"fig-131","desc":"哈密顿十二面体环路图示","orig":"fig-131_哈密顿十二面体环路图示.jpg","svg":"fig-131_哈密顿十二面体环路图示.svg"},{"id":"fig-132","desc":"哈密顿二十元游戏说明书图","orig":"fig-132_哈密顿二十元游戏说明书图.jpg","svg":""},{"id":"fig-133","desc":"珀西·约翰·希伍德肖像","orig":"fig-133_珀西·约翰·希伍德肖像.jpg","svg":""},{"id":"fig-134","desc":"希伍德肯普证明反例地图","orig":"fig-134_希伍德肯普证明反例地图.jpg","svg":"fig-134_希伍德肯普证明反例地图.svg"},{"id":"fig-135","desc":"肯普五边形被五色包围排列图","orig":"fig-135_肯普五边形被五色包围排列图.jpg","svg":"fig-135_肯普五边形被五色包围排列图.svg"},{"id":"fig-136","desc":"希伍德二十五国反例地图","orig":"fig-136_希伍德二十五国反例地图.jpg","svg":"fig-136_希伍德二十五国反例地图.svg"},{"id":"fig-137","desc":"蓝黄链分隔红绿部分图","orig":"fig-137_蓝黄链分隔红绿部分图.jpg","svg":"fig-137_蓝黄链分隔红绿部分图.svg"},{"id":"fig-138","desc":"颜色互换图ab","orig":"fig-138_颜色互换图ab.jpg","svg":"fig-138_颜色互换图ab.svg"},{"id":"fig-139","desc":"颜色互换图cd","orig":"fig-139_颜色互换图cd.jpg","svg":"fig-139_颜色互换图cd.svg"},{"id":"fig-140","desc":"同时互换两色导致冲突示意图","orig":"fig-140_同时互换两色导致冲突示意图.jpg","svg":"fig-140_同时互换两色导致冲突示意图.svg"},{"id":"fig-141","desc":"埃雷拉C30巴基球反例图","orig":"fig-141_埃雷拉C30巴基球反例图.jpg","svg":"fig-141_埃雷拉C30巴基球反例图.svg"},{"id":"fig-142","desc":"五色定理证明含正方形示意图","orig":"fig-142_五色定理证明含正方形示意图.jpg","svg":"fig-142_五色定理证明含正方形示意图.svg"},{"id":"fig-143","desc":"五色定理证明含五边形示意图","orig":"fig-143_五色定理证明含五边形示意图.jpg","svg":"fig-143_五色定理证明含五边形示意图.svg"},{"id":"fig-144","desc":"五色定理证明情况判定图","orig":"fig-144_五色定理证明情况判定图.jpg","svg":"fig-144_五色定理证明情况判定图.svg"},{"id":"fig-145","desc":"情况1五边形P着红色完成图","orig":"fig-145_情况1五边形P着红色完成图.jpg","svg":"fig-145_情况1五边形P着红色完成图.svg"},{"id":"fig-146","desc":"情况2五边形P着蓝色完成图","orig":"fig-146_情况2五边形P着蓝色完成图.jpg","svg":"fig-146_情况2五边形P着蓝色完成图.svg"},{"id":"fig-147","desc":"希伍德帝国问题分裂国家示例","orig":"fig-147_希伍德帝国问题分裂国家示例.jpg","svg":"fig-147_希伍德帝国问题分裂国家示例.svg"},{"id":"fig-148","desc":"希伍德十二色帝国地图","orig":"fig-148_希伍德十二色帝国地图.jpg","svg":"fig-148_希伍德十二色帝国地图.svg"},{"id":"fig-149","desc":"泰勒十八色帝国地图","orig":"fig-149_泰勒十八色帝国地图.jpg","svg":"fig-149_泰勒十八色帝国地图.svg"},{"id":"fig-150","desc":"环面上每国相邻地图示例","orig":"fig-150_环面上每国相邻地图示例.jpg","svg":"fig-150_环面上每国相邻地图示例.svg"},{"id":"fig-151","desc":"环面七色定理国家C示意图","orig":"fig-151_环面七色定理国家C示意图.jpg","svg":"fig-151_环面七色定理国家C示意图.svg"},{"id":"fig-152","desc":"双孔环面地图示例","orig":"fig-152_双孔环面地图示例.jpg","svg":"fig-152_双孔环面地图示例.svg"},{"id":"fig-153","desc":"彼得森图标准形式","orig":"fig-153_彼得森图标准形式.jpg","svg":"fig-153_彼得森图标准形式.svg"},{"id":"fig-154","desc":"彼得森1898年原始绘图","orig":"fig-154_彼得森1898年原始绘图.jpg","svg":""},{"id":"fig-155","desc":"肯普早年版本彼得森图","orig":"fig-155_肯普早年版本彼得森图.jpg","svg":""},{"id":"fig-156","desc":"希伍德三色边界线泰特联系图","orig":"fig-156_希伍德三色边界线泰特联系图.jpg","svg":"fig-156_希伍德三色边界线泰特联系图.svg"},{"id":"fig-157","desc":"交汇点1和负1排列示意图","orig":"fig-157_交汇点1和负1排列示意图.jpg","svg":"fig-157_交汇点1和负1排列示意图.svg"},{"id":"fig-158","desc":"邻居数被3整除推论示意图","orig":"fig-158_邻居数被3整除推论示意图.jpg","svg":"fig-158_邻居数被3整除推论示意图.svg"},{"id":"fig-159","desc":"不可避免集一二边形","orig":"fig-159_不可避免集一二边形.jpg","svg":"fig-159_不可避免集一二边形.svg"},{"id":"fig-160","desc":"不可避免集一三角形","orig":"fig-160_不可避免集一三角形.jpg","svg":"fig-160_不可避免集一三角形.svg"},{"id":"fig-161","desc":"不可避免集一四边形","orig":"fig-161_不可避免集一四边形.jpg","svg":"fig-161_不可避免集一四边形.svg"},{"id":"fig-162","desc":"不可避免集一五边形","orig":"fig-162_不可避免集一五边形.jpg","svg":"fig-162_不可避免集一五边形.svg"},{"id":"fig-163","desc":"不可避免集二二边形","orig":"fig-163_不可避免集二二边形.jpg","svg":"fig-163_不可避免集二二边形.svg"},{"id":"fig-164","desc":"不可避免集二三角形","orig":"fig-164_不可避免集二三角形.jpg","svg":"fig-164_不可避免集二三角形.svg"},{"id":"fig-165","desc":"不可避免集二四边形","orig":"fig-165_不可避免集二四边形.jpg","svg":"fig-165_不可避免集二四边形.svg"},{"id":"fig-166","desc":"两个相邻五边形构型","orig":"fig-166_两个相邻五边形构型.jpg","svg":"fig-166_两个相邻五边形构型.svg"},{"id":"fig-167","desc":"五边形六边形相邻构型","orig":"fig-167_五边形六边形相邻构型.jpg","svg":"fig-167_五边形六边形相邻构型.svg"},{"id":"fig-168","desc":"正十二面体四色地图十二五边形","orig":"fig-168_正十二面体四色地图十二五边形.jpg","svg":"fig-168_正十二面体四色地图十二五边形.svg"},{"id":"fig-169","desc":"韦尼克不可避免集二边形","orig":"fig-169_韦尼克不可避免集二边形.jpg","svg":"fig-169_韦尼克不可避免集二边形.svg"},{"id":"fig-170","desc":"韦尼克不可避免集三角形","orig":"fig-170_韦尼克不可避免集三角形.jpg","svg":"fig-170_韦尼克不可避免集三角形.svg"},{"id":"fig-171","desc":"韦尼克不可避免集四边形","orig":"fig-171_韦尼克不可避免集四边形.jpg","svg":"fig-171_韦尼克不可避免集四边形.svg"},{"id":"fig-172","desc":"韦尼克两个相邻五边形","orig":"fig-172_韦尼克两个相邻五边形.jpg","svg":"fig-172_韦尼克两个相邻五边形.svg"},{"id":"fig-173","desc":"韦尼克五边形六边形相邻","orig":"fig-173_韦尼克五边形六边形相邻.jpg","svg":"fig-173_韦尼克五边形六边形相邻.svg"},{"id":"fig-174","desc":"放电法五边形电荷分配示意图","orig":"fig-174_放电法五边形电荷分配示意图.jpg","svg":"fig-174_放电法五边形电荷分配示意图.svg"},{"id":"fig-175","desc":"放电后五边形六边形零电荷示意图","orig":"fig-175_放电后五边形六边形零电荷示意图.jpg","svg":"fig-175_放电后五边形六边形零电荷示意图.svg"},{"id":"fig-176","desc":"七边形六个相邻五边形示意图","orig":"fig-176_七边形六个相邻五边形示意图.jpg","svg":"fig-176_七边形六个相邻五边形示意图.svg"},{"id":"fig-177","desc":"勒贝格不可避免集三角形","orig":"fig-177_勒贝格不可避免集三角形.jpg","svg":"fig-177_勒贝格不可避免集三角形.svg"},{"id":"fig-178","desc":"勒贝格不可避免集四边形","orig":"fig-178_勒贝格不可避免集四边形.jpg","svg":"fig-178_勒贝格不可避免集四边形.svg"},{"id":"fig-179","desc":"三个相邻五边形构型","orig":"fig-179_三个相邻五边形构型.jpg","svg":"fig-179_三个相邻五边形构型.svg"},{"id":"fig-180","desc":"两个五边形和一个六边形构型","orig":"fig-180_两个五边形和一个六边形构型.jpg","svg":"fig-180_两个五边形和一个六边形构型.svg"},{"id":"fig-181","desc":"一个五边形和两个六边形构型","orig":"fig-181_一个五边形和两个六边形构型.jpg","svg":"fig-181_一个五边形和两个六边形构型.svg"},{"id":"fig-182","desc":"伯克霍夫三国环阴影示意图","orig":"fig-182_伯克霍夫三国环阴影示意图.jpg","svg":"fig-182_伯克霍夫三国环阴影示意图.svg"},{"id":"fig-183","desc":"四国环已着色内部地图","orig":"fig-183_四国环已着色内部地图.jpg","svg":"fig-183_四国环已着色内部地图.svg"},{"id":"fig-184","desc":"四国环已着色外部地图","orig":"fig-184_四国环已着色外部地图.jpg","svg":"fig-184_四国环已着色外部地图.svg"},{"id":"fig-185","desc":"四国环重新着色的外部地图","orig":"fig-185_四国环重新着色的外部地图.jpg","svg":"fig-185_四国环重新着色的外部地图.svg"},{"id":"fig-186","desc":"四国环完成着色的地图","orig":"fig-186_四国环完成着色的地图.jpg","svg":"fig-186_四国环完成着色的地图.svg"},{"id":"fig-187","desc":"无法直接匹配的环着色地图","orig":"fig-187_无法直接匹配的环着色地图.jpg","svg":"fig-187_无法直接匹配的环着色地图.svg"},{"id":"fig-188","desc":"已着色的内部地图第二例","orig":"fig-188_已着色的内部地图第二例.jpg","svg":"fig-188_已着色的内部地图第二例.svg"},{"id":"fig-189","desc":"已着色的外部地图第二例","orig":"fig-189_已着色的外部地图第二例.jpg","svg":"fig-189_已着色的外部地图第二例.svg"},{"id":"fig-190","desc":"伯克霍夫钻石构型图","orig":"fig-190_伯克霍夫钻石构型图.jpg","svg":"fig-190_伯克霍夫钻石构型图.svg"},{"id":"fig-191","desc":"好的着色扩展到钻石示意图","orig":"fig-191_好的着色扩展到钻石示意图.jpg","svg":"fig-191_好的着色扩展到钻石示意图.svg"},{"id":"fig-192","desc":"rgrbrb肯普链互换三情况图","orig":"fig-192_rgrbrb肯普链互换三情况图.jpg","svg":"fig-192_rgrbrb肯普链互换三情况图.svg"},{"id":"fig-193","desc":"rgrbry肯普链互换两情况图","orig":"fig-193_rgrbry肯普链互换两情况图.jpg","svg":"fig-193_rgrbry肯普链互换两情况图.svg"},{"id":"fig-194","desc":"移除五条边界线简化地图图","orig":"fig-194_移除五条边界线简化地图图.jpg","svg":"fig-194_移除五条边界线简化地图图.svg"},{"id":"fig-195","desc":"黄金比例五边形示意图","orig":"fig-195_黄金比例五边形示意图.jpg","svg":"fig-195_黄金比例五边形示意图.svg"},{"id":"fig-196","desc":"黄金矩形示意图","orig":"fig-196_黄金矩形示意图.jpg","svg":"fig-196_黄金矩形示意图.svg"},{"id":"fig-197","desc":"杨斯与林格尔1968年合影","orig":"fig-197_杨斯与林格尔1968年合影.jpg","svg":""},{"id":"fig-198","desc":"海因里希·黑施肖像","orig":"fig-198_海因里希·黑施肖像.jpg","svg":""},{"id":"fig-199","desc":"黑施密铺图案","orig":"fig-199_黑施密铺图案.jpg","svg":"fig-199_黑施密铺图案.svg"},{"id":"fig-200","desc":"哥廷根图书馆天花板密铺图案","orig":"fig-200_哥廷根图书馆天花板密铺图案.jpg","svg":""},{"id":"fig-201","desc":"可解开的绳结示意图","orig":"fig-201_可解开的绳结示意图.jpg","svg":"fig-201_可解开的绳结示意图.svg"},{"id":"fig-202","desc":"打结的绳团示意图","orig":"fig-202_打结的绳团示意图.jpg","svg":"fig-202_打结的绳团示意图.svg"},{"id":"fig-203","desc":"黑施可约构形档案盒照片","orig":"fig-203_黑施可约构形档案盒照片.jpg","svg":""},{"id":"fig-204","desc":"伯克霍夫钻石环大小示意图","orig":"fig-204_伯克霍夫钻石环大小示意图.jpg","svg":"fig-204_伯克霍夫钻石环大小示意图.svg"},{"id":"fig-205","desc":"环大小14八国构形示意图","orig":"fig-205_环大小14八国构形示意图.jpg","svg":"fig-205_环大小14八国构形示意图.svg"},{"id":"fig-206","desc":"黑施四符号及对应国家构形图","orig":"fig-206_黑施四符号及对应国家构形图.jpg","svg":"fig-206_黑施四符号及对应国家构形图.svg"},{"id":"fig-207","desc":"黑施图表的一页","orig":"fig-207_黑施图表的一页.jpg","svg":""},{"id":"fig-208","desc":"岛本马蹄构型图","orig":"fig-208_岛本马蹄构型图.jpg","svg":"fig-208_岛本马蹄构型图.svg"},{"id":"fig-209","desc":"黑施岛本迪雷布鲁克海文合影","orig":"fig-209_黑施岛本迪雷布鲁克海文合影.jpg","svg":""},{"id":"fig-210","desc":"阿佩尔和哈肯凝视解答照片","orig":"fig-210_阿佩尔和哈肯凝视解答照片.jpg","svg":""},{"id":"fig-211","desc":"黑施障碍四足国家示意图","orig":"fig-211_黑施障碍四足国家示意图.jpg","svg":"fig-211_黑施障碍四足国家示意图.svg"},{"id":"fig-212","desc":"黑施障碍三足铰接国家示意图","orig":"fig-212_黑施障碍三足铰接国家示意图.jpg","svg":"fig-212_黑施障碍三足铰接国家示意图.svg"},{"id":"fig-213","desc":"黑施障碍悬挂5-5对示意图","orig":"fig-213_黑施障碍悬挂5-5对示意图.jpg","svg":"fig-213_黑施障碍悬挂5-5对示意图.svg"},{"id":"fig-214","desc":"约翰·科克与博士证书合影","orig":"fig-214_约翰·科克与博士证书合影.jpg","svg":""},{"id":"fig-215","desc":"四种颜色足矣黑板布告照片","orig":"fig-215_四种颜色足矣黑板布告照片.jpg","svg":""},{"id":"fig-216","desc":"FOUR_COLORS_SUFFICE邮资戳图","orig":"fig-216_FOUR_COLORS_SUFFICE邮资戳图.jpg","svg":""},{"id":"fig-217","desc":"阿佩尔和哈肯的可约构形示意图","orig":"fig-217_阿佩尔和哈肯的可约构形示意图.jpg","svg":""}];
+const KEY = 'fct-review-v1';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e) { state = {}; }
+let filter = 'all', idx = 0;
+
+const $ = s => document.querySelector(s);
+const enc = f => 'images/' + encodeURIComponent(f);
+const st = id => (state[id] && state[id].status) || 'todo';
+
+function visible() {
+  if (filter === 'todo')  return ITEMS.filter(x => st(x.id) === 'todo');
+  if (filter === 'fix')   return ITEMS.filter(x => st(x.id) === 'fix');
+  if (filter === 'nosvg') return ITEMS.filter(x => !x.svg);
+  return ITEMS;
+}
+
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function renderList() {
+  const vis = visible();
+  $('#list').innerHTML = vis.map((x, i) => {
+    const s = st(x.id);
+    const cls = [s === 'ok' ? 'ok' : s === 'fix' ? 'fix' : 'todo',
+                 i === idx ? 'cur' : '', x.svg ? '' : 'nosvg'].join(' ');
+    return `<div class="${cls}" data-i="${i}">${x.id} ${x.desc || ''}</div>`;
+  }).join('');
+  const cur = $('#list .cur'); if (cur) cur.scrollIntoView({block:'nearest'});
+}
+
+function renderStats() {
+  let ok = 0, fx = 0;
+  ITEMS.forEach(x => { const s = st(x.id); if (s === 'ok') ok++; else if (s === 'fix') fx++; });
+  const todo = ITEMS.length - ok - fx;
+  $('#n-all').textContent = ITEMS.length;
+  $('#n-ok').textContent = ok; $('#n-fix').textContent = fx; $('#n-todo').textContent = todo;
+  $('#bar > div').style.width = (100 * (ok + fx) / ITEMS.length) + '%';
+  $('#done').style.display = todo === 0 ? 'block' : 'none';
+  if (todo === 0) $('#done').innerHTML =
+    `<b>全部审完了。</b>通过 ${ok} 张，待改 ${fx} 张 —— 点右上「导出 JSON」拿到修改清单交给 AI。`;
+}
+
+function render() {
+  const vis = visible();
+  if (!vis.length) {
+    $('#box-o').innerHTML = '<span class="none">（该筛选下没有图）</span>';
+    $('#box-n').innerHTML = ''; $('#title').textContent = ''; renderList(); renderStats(); return;
+  }
+  if (idx >= vis.length) idx = vis.length - 1;
+  if (idx < 0) idx = 0;
+  const x = vis[idx];
+  $('#box-o').innerHTML = x.orig
+    ? `<img src="${enc(x.orig)}" onclick="window.open(this.src)">`
+    : '<span class="none">无原图</span>';
+  $('#box-n').innerHTML = x.svg
+    ? `<img src="${enc(x.svg)}" onclick="window.open(this.src)">`
+    : '<span class="none">尚未重绘</span>';
+  const s = st(x.id);
+  const tag = s === 'ok' ? '<span style="color:#4caf50">● 已通过</span>'
+            : s === 'fix' ? '<span style="color:#ff9800">● 待修改</span>'
+            : '<span style="color:#999">○ 未审</span>';
+  $('#title').innerHTML = `<b>${x.id}</b> ${x.desc || ''} &nbsp; ${tag} &nbsp;
+     <span style="color:#888">(${idx + 1}/${vis.length})</span>`;
+  $('#cmt').value = (state[x.id] && state[x.id].comment) || '';
+  renderList(); renderStats();
+}
+
+function mark(status) {
+  const vis = visible(); if (!vis.length) return;
+  const x = vis[idx];
+  const c = $('#cmt').value.trim();
+  if (status === 'fix' && !c) { alert('请先填写修改意见'); $('#cmt').focus(); return; }
+  state[x.id] = { status, comment: c, at: new Date().toISOString().slice(0, 19) };
+  save();
+  // 在「仅未审/仅待改」筛选下，本条会移出列表，停在原位即自动前进
+  if (filter === 'all') idx = Math.min(idx + 1, ITEMS.length - 1);
+  render();
+}
+
+$('#pass').onclick = () => mark('ok');
+$('#fix').onclick  = () => mark('fix');
+$('#prev').onclick = () => { idx--; render(); };
+$('#next').onclick = () => { idx++; render(); };
+$('#list').onclick = e => { const t = e.target.closest('[data-i]'); if (t) { idx = +t.dataset.i; render(); } };
+
+[['f-all','all'],['f-todo','todo'],['f-fix','fix'],['f-nosvg','nosvg']].forEach(([id, f]) => {
+  $('#' + id).onclick = () => {
+    filter = f; idx = 0;
+    document.querySelectorAll('header button').forEach(b => b.classList.remove('on'));
+    $('#' + id).classList.add('on');
+    render();
+  };
+});
+
+$('#rst').onclick = () => {
+  if (confirm('清空所有校对进度？不可恢复。')) { state = {}; save(); idx = 0; render(); }
+};
+
+$('#exp').onclick = () => {
+  const fixes = [], approved = [], pending = [];
+  ITEMS.forEach(x => {
+    const s = state[x.id];
+    const rec = { id: x.id, desc: x.desc, original: x.orig ? 'images/' + x.orig : null,
+                  svg: x.svg ? 'images/' + x.svg : null };
+    if (!s || s.status === 'todo') pending.push(rec);
+    else if (s.status === 'ok') approved.push(x.id);
+    else fixes.push(Object.assign(rec, { comment: s.comment, reviewed_at: s.at }));
+  });
+  const out = {
+    project: '《四色足矣：四色猜想是如何解决的》插图重绘校对结果',
+    exported_at: new Date().toISOString().slice(0, 19),
+    summary: { total: ITEMS.length, approved: approved.length,
+               needs_fix: fixes.length, pending: pending.length },
+    instructions_for_ai:
+      '请逐条处理 needs_fix。每条给出 svg（待修改文件）、original（原始扫描件，供对照）和 comment（人工修改意见）。' +
+      '修改后覆盖同名 .svg，不要动 original，也不要修改 _redraw_tools/ 下的共享文件。',
+    needs_fix: fixes,
+    approved: approved,
+    pending: pending.map(r => r.id)
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'review_result.json';
+  a.click();
+};
+
+document.onkeydown = e => {
+  if (e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft')  { idx--; render(); }
+  if (e.key === 'ArrowRight') { idx++; render(); }
+  if (e.key === 'a' || e.key === 'A') mark('ok');
+  if (e.key === 's' || e.key === 'S') { $('#cmt').focus(); }
+};
+
+render();
+</script>
+</body>
+</html>

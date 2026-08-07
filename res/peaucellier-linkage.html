@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peaucellier–Lipkin 直线连杆机构</title>
+<style>
+  :root{
+    --paper:#E7EBE4;
+    --paper-2:#DDE3DB;
+    --grid:#C6D0C8;
+    --ink:#1E2A33;
+    --ink-soft:#5A6A73;
+    --blue:#2F5D8C;
+    --red:#B23A18;
+    --brass:#8A7A4E;
+    --rule:#9AA79C;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:"Helvetica Neue",Inter,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .sheet{
+    max-width:1100px;margin:22px auto;padding:0;
+    border:1.5px solid var(--ink);
+    background:rgba(231,235,228,.94);
+    box-shadow:0 1px 0 rgba(30,42,51,.25), 0 14px 40px -28px rgba(30,42,51,.8);
+  }
+  .sheet-head{
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+    padding:14px 20px;border-bottom:1px solid var(--rule);
+  }
+  .sheet-head h1{
+    margin:0;font-size:19px;font-weight:600;letter-spacing:.06em;
+  }
+  .sheet-head .sub{color:var(--ink-soft);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase}
+  .stage{position:relative;border-bottom:1px solid var(--rule)}
+  canvas{display:block;width:100%;height:auto;touch-action:none}
+  .titleblock{
+    position:absolute;right:14px;bottom:14px;
+    border:1px solid var(--ink);background:rgba(231,235,228,.9);
+    font-size:11.5px;letter-spacing:.04em;
+    min-width:216px;
+  }
+  .titleblock .row{display:flex;justify-content:space-between;gap:16px;padding:4px 9px;border-bottom:1px solid var(--rule)}
+  .titleblock .row:last-child{border-bottom:0}
+  .titleblock .k{color:var(--ink-soft);text-transform:uppercase;font-size:10.5px}
+  .titleblock .v{font-variant-numeric:tabular-nums}
+  .titleblock .v.hi{color:var(--red)}
+  .controls{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:0;
+  }
+  .ctl{padding:12px 18px;border-right:1px solid var(--rule)}
+  .ctl:last-child{border-right:0}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .ctl label b{font-size:13px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0}
+  input[type=range]{width:100%;margin:8px 0 0;accent-color:var(--blue)}
+  .buttons{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--rule);flex-wrap:wrap;align-items:center}
+  button{
+    font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    padding:6px 14px;border:1px solid var(--ink);background:transparent;color:var(--ink);
+    cursor:pointer;
+  }
+  button:hover{background:var(--ink);color:var(--paper)}
+  button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .note{padding:12px 18px;border-top:1px solid var(--rule);color:var(--ink-soft);font-size:12.5px}
+  .note code{color:var(--ink);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .warn{color:var(--red)}
+  @media (max-width:640px){ .ctl{border-right:0;border-bottom:1px solid var(--rule)} .titleblock{position:static;margin:0 14px 14px;} }
+  @media (prefers-reduced-motion:reduce){ }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="sheet-head">
+    <h1>Peaucellier–Lipkin 直线连杆机构</h1>
+    <span class="sub">Inversor · 1864 / 1871</span>
+  </div>
+
+  <div class="stage">
+    <canvas id="cv"></canvas>
+    <div class="titleblock">
+      <div class="row"><span class="k">|OB| · |OD|</span><span class="v" id="v-prod">—</span></div>
+      <div class="row"><span class="k">a² − b²</span><span class="v" id="v-k2">—</span></div>
+      <div class="row"><span class="k">D 的横坐标</span><span class="v hi" id="v-dx">—</span></div>
+      <div class="row"><span class="k">最大偏差</span><span class="v" id="v-err">—</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctl"><label>长杆 a <b id="l-a">6.00</b></label><input id="s-a" type="range" min="4" max="9" step="0.05" value="6"></div>
+    <div class="ctl"><label>菱形边 b <b id="l-b">3.60</b></label><input id="s-b" type="range" min="1.5" max="6" step="0.05" value="3.6"></div>
+    <div class="ctl"><label>曲柄 c <b id="l-c">2.00</b></label><input id="s-c" type="range" min="0.8" max="3.5" step="0.05" value="2"></div>
+    <div class="ctl"><label>转速 <b id="l-v">0.60</b></label><input id="s-v" type="range" min="0" max="2" step="0.02" value="0.6"></div>
+  </div>
+
+  <div class="buttons">
+    <button id="btn-play">暂停</button>
+    <button id="btn-clear">清除轨迹</button>
+    <button id="btn-guide">隐藏辅助线</button>
+    <button id="btn-reset">恢复默认</button>
+    <span id="status" class="warn"></span>
+  </div>
+
+  <div class="note">
+    左侧 <code>O</code> 与 <code>P</code> 是两个固定支点，<code>|PO| = |PB| = c</code>，所以曲柄端点 <code>B</code> 走一个<b>经过 O 的圆</b>。
+    两根长杆 <code>OA = OC = a</code>，四根短杆围成边长 <code>b</code> 的菱形 <code>ABCD</code>。
+    机构恒等式 <code>|OB|·|OD| = a² − b²</code> 说明 D 是 B 关于 O 的反演像；圆经过反演中心时像是一条直线，于是 D 画出精确直线。
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+
+  const DEF = {a:6, b:3.6, c:2, v:0.6};
+  let P = {...DEF};
+  let playing = true, guides = true, t = 0, last = performance.now();
+  let trail = [], maxErr = 0;
+
+  const el = id => document.getElementById(id);
+
+  /* ---------- 运动学 ---------- */
+  function phiLimit(p){
+    const s = (p.a - p.b) / (2*p.c);        // 菱形能闭合要求 |OB| >= a-b
+    if (s >= 1) return 0;
+    return 2*Math.acos(s) * 0.995;          // 留一点余量，避开奇异位形
+  }
+  function solve(phi, p){
+    const O = {x:0, y:0}, Pv = {x:p.c, y:0};
+    const B = {x:p.c + p.c*Math.cos(phi), y:p.c*Math.sin(phi)};
+    const k2 = p.a*p.a - p.b*p.b;
+    const r2 = B.x*B.x + B.y*B.y;
+    const D = {x: B.x*k2/r2, y: B.y*k2/r2};
+    const M = {x:(B.x+D.x)/2, y:(B.y+D.y)/2};
+    let dx = D.x-B.x, dy = D.y-B.y;
+    const L = Math.hypot(dx,dy) || 1e-9;
+    const ux = dx/L, uy = dy/L, h = L/2;
+    const q = p.b*p.b - h*h;
+    const am = Math.sqrt(Math.max(0,q));
+    const A = {x:M.x - uy*am, y:M.y + ux*am};
+    const C = {x:M.x + uy*am, y:M.y - ux*am};
+    return {O, P:Pv, A, B, C, D, k2, ok:q >= 0};
+  }
+
+  /* ---------- 视口 ---------- */
+  let W=900, H=560, sc=1, ox=0, oy=0;
+  function fit(){
+    const lim = phiLimit(P);
+    let xmin=0, xmax=0, ymin=0, ymax=0;
+    for(let i=0;i<=120;i++){
+      const g = solve(-lim + 2*lim*i/120, P);
+      for(const k of ['O','P','A','B','C','D']){
+        xmin=Math.min(xmin,g[k].x); xmax=Math.max(xmax,g[k].x);
+        ymin=Math.min(ymin,g[k].y); ymax=Math.max(ymax,g[k].y);
+      }
+    }
+    const mx = 1.2;
+    xmin-=mx; xmax+=mx; ymin-=mx; ymax+=mx;
+    sc = Math.min(W/(xmax-xmin), H/(ymax-ymin));
+    ox = (W - (xmax-xmin)*sc)/2 - xmin*sc;
+    oy = (H - (ymax-ymin)*sc)/2 - ymin*sc;
+  }
+  const X = x => ox + x*sc;
+  const Y = y => H - (oy + y*sc);   // y 轴朝上
+
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    W = cv.clientWidth || 900;
+    H = Math.max(340, Math.min(600, Math.round(W*0.60)));
+    cv.style.height = H + 'px';
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    fit();
+  }
+  window.addEventListener('resize', resize);
+
+  /* ---------- 绘制原语 ---------- */
+  function bar(p,q,w,fill,edge){
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(X(p.x),Y(p.y)); ctx.lineTo(X(q.x),Y(q.y));
+    ctx.strokeStyle=edge; ctx.lineWidth=w+2.4; ctx.stroke();
+    ctx.strokeStyle=fill; ctx.lineWidth=w; ctx.stroke();
+  }
+  function pin(p,r){
+    ctx.beginPath(); ctx.arc(X(p.x),Y(p.y),r,0,7);
+    ctx.fillStyle='#F2F4F0'; ctx.fill();
+    ctx.strokeStyle='#1E2A33'; ctx.lineWidth=1.6; ctx.stroke();
+  }
+  function ground(p){
+    const x=X(p.x), y=Y(p.y), s=11;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-s,y+s*1.5); ctx.lineTo(x+s,y+s*1.5); ctx.closePath();
+    ctx.fillStyle='rgba(30,42,51,.10)'; ctx.fill();
+    ctx.strokeStyle='#1E2A33'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.beginPath();
+    for(let i=-1;i<=3;i++){ ctx.moveTo(x-s+ i*6, y+s*1.5); ctx.lineTo(x-s+ i*6 -5, y+s*1.5+6); }
+    ctx.stroke();
+  }
+  function tag(p,txt,dx,dy,col){
+    ctx.fillStyle=col||'#1E2A33';
+    ctx.font='600 13px ui-monospace,Menlo,Consolas,monospace';
+    ctx.fillText(txt, X(p.x)+dx, Y(p.y)+dy);
+  }
+
+  /* ---------- 主循环 ---------- */
+  function frame(now){
+    const dt = Math.min(0.05,(now-last)/1000); last = now;
+    if (playing) t += dt*P.v*1.6;
+
+    const lim = phiLimit(P);
+    const phi = lim*Math.sin(t);
+    const g = solve(phi, P);
+    const k2 = g.k2;
+    const lineX = k2/(2*P.c);
+
+    if (playing && g.ok){
+      trail.push({x:g.D.x, y:g.D.y});
+      if (trail.length>4000) trail.shift();
+      maxErr = Math.max(maxErr, Math.abs(g.D.x - lineX));
+    }
+
+    ctx.clearRect(0,0,W,H);
+
+    // 理论直线 + 反演圆 + 曲柄圆
+    if (guides){
+      ctx.save();
+      ctx.setLineDash([7,5]); ctx.lineWidth=1.2; ctx.strokeStyle='#2F5D8C';
+      ctx.beginPath(); ctx.arc(X(P.c),Y(0),P.c*sc,0,7); ctx.stroke();          // 曲柄圆
+      ctx.setLineDash([2,4]); ctx.strokeStyle='rgba(138,122,78,.85)';
+      ctx.beginPath(); ctx.arc(X(0),Y(0),Math.sqrt(k2)*sc,0,7); ctx.stroke();  // 反演圆 k=√(a²−b²)
+      ctx.setLineDash([9,6]); ctx.strokeStyle='rgba(178,58,24,.55)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(X(lineX),0); ctx.lineTo(X(lineX),H); ctx.stroke();
+      ctx.setLineDash([]); ctx.strokeStyle='rgba(30,42,51,.35)';
+      ctx.beginPath(); ctx.moveTo(X(g.O.x),Y(g.O.y)); ctx.lineTo(X(g.D.x),Y(g.D.y)); ctx.stroke(); // O,B,D 共线
+      ctx.restore();
+    }
+
+    // D 的轨迹
+    if (trail.length>1){
+      ctx.beginPath();
+      ctx.moveTo(X(trail[0].x),Y(trail[0].y));
+      for(const p of trail) ctx.lineTo(X(p.x),Y(p.y));
+      ctx.strokeStyle='#B23A18'; ctx.lineWidth=3.2; ctx.stroke();
+    }
+
+    if (g.ok){
+      const FILL='#C9C2AE', EDGE='#4A4E57';
+      bar(g.O,g.A,10,FILL,EDGE); bar(g.O,g.C,10,FILL,EDGE);       // 两根长杆
+      bar(g.A,g.B,9,FILL,EDGE); bar(g.B,g.C,9,FILL,EDGE);         // 菱形
+      bar(g.C,g.D,9,FILL,EDGE); bar(g.D,g.A,9,FILL,EDGE);
+      bar(g.P,g.B,8,'#B9A97A','#6E6141');                          // 曲柄
+      ground(g.O); ground(g.P);
+      pin(g.O,6); pin(g.P,5.5); pin(g.A,5.5); pin(g.B,6); pin(g.C,5.5);
+      ctx.beginPath(); ctx.arc(X(g.D.x),Y(g.D.y),7,0,7);
+      ctx.fillStyle='#B23A18'; ctx.fill(); ctx.strokeStyle='#5C1B08'; ctx.lineWidth=1.6; ctx.stroke();
+
+      tag(g.O,'O',-20,6); tag(g.P,'P',-4,22); tag(g.A,'A',10,-8);
+      tag(g.B,'B',-6,-14); tag(g.C,'C',8,20); tag(g.D,'D',14,5,'#B23A18');
+    }
+
+    const ob = Math.hypot(g.B.x,g.B.y), od = Math.hypot(g.D.x,g.D.y);
+    el('v-prod').textContent = (ob*od).toFixed(4);
+    el('v-k2').textContent   = k2.toFixed(4);
+    el('v-dx').textContent   = g.ok ? g.D.x.toFixed(6) : '—';
+    el('v-err').textContent  = maxErr.toExponential(2);
+    el('status').textContent = g.ok ? (lim===0 ? '参数无解：需要 2c ≥ a − b' : '') : '菱形无法闭合';
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- 交互 ---------- */
+  function sync(){
+    el('l-a').textContent=P.a.toFixed(2); el('l-b').textContent=P.b.toFixed(2);
+    el('l-c').textContent=P.c.toFixed(2); el('l-v').textContent=P.v.toFixed(2);
+    el('s-a').value=P.a; el('s-b').value=P.b; el('s-c').value=P.c; el('s-v').value=P.v;
+    if (P.b >= P.a) { P.b = P.a - 0.2; el('l-b').textContent=P.b.toFixed(2); }
+    trail=[]; maxErr=0; fit();
+  }
+  ['a','b','c','v'].forEach(k=>{
+    el('s-'+k).addEventListener('input', e=>{ P[k]=parseFloat(e.target.value); sync(); });
+  });
+  el('btn-play').addEventListener('click', e=>{ playing=!playing; e.target.textContent = playing?'暂停':'继续'; });
+  el('btn-clear').addEventListener('click', ()=>{ trail=[]; maxErr=0; });
+  el('btn-guide').addEventListener('click', e=>{ guides=!guides; e.target.textContent = guides?'隐藏辅助线':'显示辅助线'; });
+  el('btn-reset').addEventListener('click', ()=>{ P={...DEF}; sync(); });
+
+  resize(); sync(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

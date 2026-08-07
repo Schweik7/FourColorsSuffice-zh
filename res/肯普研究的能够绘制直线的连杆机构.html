@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>波塞利-利普金连杆机构动画</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            font-family: sans-serif;
+            color: #333;
+        }
+        canvas {
+            background-color: #ffffff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .info {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>波塞利-利普金连杆机构 (Peaucellier-Lipkin)</h2>
+        <p>注意观察最右侧红色的点，它画出的是一条完美的直线。</p>
+    </div>
+    <canvas id="linkageCanvas" width="800" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('linkageCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 连杆机构的几何参数
+        const r = 60;    // 曲柄半径 OM 和 MA 的长度
+        const L = 200;   // 长臂 OB 和 OC 的长度
+        const a = 100;   // 菱形边长 AB, AC, DB, DC
+
+        // 固定点坐标
+        const Ox = 200;
+        const Oy = 250;
+        const Mx = Ox + r;
+        const My = Oy;
+
+        // 记录直线轨迹
+        const path = [];
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 利用正弦函数让曲柄来回摆动，防止超过机械极限导致死锁
+            // 确保 OA 的长度不会小于 L - a
+            const maxAngle = 1.15; // 限制摆动幅度在安全范围内
+            const theta = Math.sin(Date.now() / 600) * maxAngle;
+
+            // 1. 计算曲柄末端点 A 的坐标
+            const Ax = Mx + r * Math.cos(theta);
+            const Ay = My + r * Math.sin(theta);
+
+            // 2. 计算向量 OA 的长度和方向
+            const dx = Ax - Ox;
+            const dy = Ay - Oy;
+            const OA = Math.sqrt(dx * dx + dy * dy);
+            
+            const ux = dx / OA; // 单位向量 X
+            const uy = dy / OA; // 单位向量 Y
+
+            // 3. 利用反演原理计算点 D： OA * OD = L^2 - a^2
+            const K = L * L - a * a;
+            const OD = K / OA;
+            const Dx = Ox + OD * ux;
+            const Dy = Oy + OD * uy;
+
+            // 4. 计算菱形对角线交点 E 和点 B, C 的坐标
+            const OE = (OA + OD) / 2;
+            const Ex = Ox + OE * ux;
+            const Ey = Oy + OE * uy;
+
+            const BE = Math.sqrt(L * L - OE * OE);
+            
+            // 法向量 (逆时针旋转 90 度)
+            const nx = -uy;
+            const ny = ux;
+
+            const Bx = Ex + BE * nx;
+            const By = Ey + BE * ny;
+            const Cx = Ex - BE * nx;
+            const Cy = Ey - BE * ny;
+
+            // 记录轨迹点
+            path.push({x: Dx, y: Dy});
+            if (path.length > 300) path.shift(); // 保持轨迹数组不过长
+
+            // --- 渲染部分 ---
+
+            // 绘制虚线圆 (点A的运动轨迹)
+            ctx.beginPath();
+            ctx.arc(Mx, My, r, 0, Math.PI * 2);
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]); // 重置为实线
+
+            // 绘制直线轨迹
+            if (path.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for(let i = 1; i < path.length; i++) {
+                    ctx.lineTo(path[i].x, path[i].y);
+                }
+                ctx.strokeStyle = '#e74c3c'; // 红色轨迹
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+
+            // 辅助函数：绘制连杆
+            function drawLink(x1, y1, x2, y2) {
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+
+            // 绘制所有连杆
+            drawLink(Mx, My, Ax, Ay); // 曲柄
+            drawLink(Ox, Oy, Bx, By); // 长臂上
+            drawLink(Ox, Oy, Cx, Cy); // 长臂下
+            drawLink(Ax, Ay, Bx, By); // 菱形左上
+            drawLink(Ax, Ay, Cx, Cy); // 菱形左下
+            drawLink(Dx, Dy, Bx, By); // 菱形右上
+            drawLink(Dx, Dy, Cx, Cy); // 菱形右下
+
+            // 辅助函数：绘制铰链节点
+            function drawJoint(x, y, isFixed) {
+                ctx.beginPath();
+                ctx.arc(x, y, 7, 0, Math.PI * 2);
+                ctx.fillStyle = isFixed ? '#27ae60' : '#f1c40f'; // 绿色表示固定点，黄色表示活动点
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // 绘制所有节点
+            drawJoint(Ox, Oy, true); // O点 (固定)
+            drawJoint(Mx, My, true); // M点 (固定曲柄轴)
+            drawJoint(Ax, Ay, false); 
+            drawJoint(Bx, By, false); 
+            drawJoint(Cx, Cy, false); 
+            drawJoint(Dx, Dy, false); // 画笔点
+
+            // 循环动画
+            requestAnimationFrame(draw);
+        }
+
+        // 启动动画
+        draw();
+    </script>
+</body>
+</html>

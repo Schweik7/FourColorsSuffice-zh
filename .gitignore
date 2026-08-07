@@ -1,0 +1,11 @@
+# 打包产物：通过 GitHub Release 发布，不纳入版本库
+*.epub
+
+# 编辑备份
+*.bak
+
+# 工具缓存
+.playwright-mcp/
+**/__pycache__/
+.DS_Store
+Thumbs.db
