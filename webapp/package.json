@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "smoke": "esbuild scripts/smoke.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/smoke.mjs --log-level=warning && node node_modules/.tmp/smoke.mjs",
     "parse-test": "esbuild scripts/parse-test.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/parse-test.mjs --log-level=warning && node node_modules/.tmp/parse-test.mjs",
-    "test": "pnpm parse-test && pnpm smoke"
+    "test": "pnpm parse-test && pnpm progress-test && pnpm smoke",
+    "progress-test": "esbuild scripts/progress-test.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/progress-test.mjs --log-level=warning && node node_modules/.tmp/progress-test.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

@@ -19,6 +19,18 @@ pnpm test       # 解析器测试 + 生成算法冒烟测试
 挂到 `/images/**`，构建时整个拷进 `dist/`（设 `BUILD_ASSETS=0` 可跳过拷贝）。
 校对台的插图清单也由这个插件在构建期扫描 `images/` 生成，取代了原先 `gen_review.py` 内嵌清单的做法。
 
+## 校对进度从哪来
+
+localStorage 是按 origin 隔离的：旧的 `review.html` 多半是 `file://` 双击打开的，
+和本应用不共享数据。所以校对台在本地进度为空时，会自动读项目根目录的
+`review_result.json` 打底，把上一轮的成果接上（本地已有记录则不动）。
+
+工具栏的「导入进度」认两种格式，两种都会**合并**进现有进度而不是覆盖：
+
+- 校对台导出的 `review_result.json`
+- 旧版 localStorage 里的原始结构 `{ "fig-001": { status, comment, at }, … }`
+  （在旧页面的控制台里执行 `copy(localStorage.getItem('fct-review-v1'))` 就能拿到）
+
 ---
 
 ## 生成器是怎么工作的

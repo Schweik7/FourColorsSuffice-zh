@@ -10,4 +10,7 @@ declare module 'virtual:book-manifest' {
   }
   const figures: FigureEntry[]
   export default figures
+
+  /** 项目根目录下 review_result.json 的内容；没有该文件时为 null */
+  export const savedReview: unknown
 }

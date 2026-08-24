@@ -49,6 +49,22 @@ export function scanFigures(): FigureEntry[] {
     .map(([id, rec]) => ({ id, ...rec }))
 }
 
+/**
+ * 读取项目根目录下已有的 review_result.json。
+ * 它是上一轮人工校对的成果，用来在浏览器本地进度为空时打底——
+ * localStorage 按 origin 隔离，用 file:// 打开过的旧 review.html 攒下的记录
+ * 本应用是读不到的，只能从这个文件恢复。
+ */
+export function readSavedReview(): unknown {
+  const file = path.join(BOOK_ROOT, 'review_result.json')
+  if (!fs.existsSync(file)) return null
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
 function copyDirInto(src: string, dst: string) {
   if (!fs.existsSync(src)) return
   fs.mkdirSync(dst, { recursive: true })
@@ -80,7 +96,10 @@ export function bookAssets(): Plugin {
 
     load(id) {
       if (id !== RESOLVED_ID) return null
-      return `export default ${JSON.stringify(scanFigures())}`
+      return [
+        `export default ${JSON.stringify(scanFigures())}`,
+        `export const savedReview = ${JSON.stringify(readSavedReview())}`,
+      ].join('\n')
     },
 
     configureServer(server) {

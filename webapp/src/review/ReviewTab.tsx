@@ -1,14 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import figures from 'virtual:book-manifest'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import figures, { savedReview } from 'virtual:book-manifest'
+import { countProgress, parseProgress, type ProgressMap, type Status } from './progress'
 
-type Status = 'todo' | 'ok' | 'fix'
 type Filter = 'all' | 'todo' | 'fix' | 'nosvg'
-
-interface Record_ {
-  status: Status
-  comment: string
-  at: string
-}
 
 const KEY = 'fct-review-v1'
 
@@ -19,22 +13,42 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'nosvg', label: '仅无新图' },
 ]
 
-function loadState(): Record<string, Record_> {
+/**
+ * 首次进来时的初始进度。
+ *
+ * 本应用与旧的 review.html 不共享 localStorage（后者多半是 file:// 打开的，
+ * 属于另一个 origin），所以本地为空时用项目里的 review_result.json 打底，
+ * 把上一轮的成果接上。本地已有记录就不动它。
+ */
+function loadInitialState(): { progress: ProgressMap; seeded: boolean } {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || '{}')
+    const stored = JSON.parse(localStorage.getItem(KEY) || '{}')
+    if (stored && typeof stored === 'object' && Object.keys(stored).length) {
+      return { progress: stored, seeded: false }
+    }
   } catch {
-    return {}
+    // 本地数据坏了就当没有，走下面的打底
   }
+
+  const { progress } = parseProgress(savedReview)
+  return { progress, seeded: Object.keys(progress).length > 0 }
 }
 
 const assetUrl = (dir: string, file: string) =>
   `${import.meta.env.BASE_URL}${dir}/${encodeURIComponent(file)}`
 
 export default function ReviewTab() {
-  const [state, setState] = useState<Record<string, Record_>>(loadState)
+  const initial = useRef(loadInitialState())
+  const [state, setState] = useState<ProgressMap>(initial.current.progress)
   const [filter, setFilter] = useState<Filter>('all')
   const [idx, setIdx] = useState(0)
   const [comment, setComment] = useState('')
+  const [notice, setNotice] = useState<string | null>(() => {
+    if (!initial.current.seeded) return null
+    const { ok, fix } = countProgress(initial.current.progress)
+    return `本地还没有进度，已从项目里的 review_result.json 接上上一轮的成果：通过 ${ok} 张、待改 ${fix} 张。`
+  })
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     localStorage.setItem(KEY, JSON.stringify(state))
@@ -147,6 +161,33 @@ export default function ReviewTab() {
     URL.revokeObjectURL(a.href)
   }
 
+  const importJson = async (file: File) => {
+    let raw: unknown
+    try {
+      raw = JSON.parse(await file.text())
+    } catch {
+      setNotice('这个文件不是合法的 JSON。')
+      return
+    }
+
+    const { progress, shape, error } = parseProgress(raw)
+    if (error) {
+      setNotice(error)
+      return
+    }
+
+    const { ok, fix } = countProgress(progress)
+    const known = new Set(figures.map((f) => f.id))
+    const unknown = Object.keys(progress).filter((id) => !known.has(id))
+
+    // 合并而不是覆盖：本地已审、文件里没提到的条目应当保留
+    setState((prev) => ({ ...prev, ...progress }))
+    setNotice(
+      `已导入${shape === 'export' ? '导出文件' : '原始记录'}：通过 ${ok} 张、待改 ${fix} 张。` +
+        (unknown.length ? ` 其中 ${unknown.length} 条对不上当前的插图（${unknown.slice(0, 3).join('、')}${unknown.length > 3 ? '…' : ''}），已一并保留。` : ''),
+    )
+  }
+
   if (!figures.length) {
     return (
       <div className="empty-note">
@@ -177,6 +218,24 @@ export default function ReviewTab() {
           </button>
         ))}
         <span className="spacer" />
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void importJson(file)
+            e.target.value = ''
+          }}
+        />
+        <button
+          className="chip"
+          onClick={() => fileRef.current?.click()}
+          title="导入 review_result.json，或旧版 localStorage 里的原始记录"
+        >
+          导入进度
+        </button>
         <button className="chip" onClick={exportJson}>
           导出 JSON
         </button>
@@ -186,12 +245,22 @@ export default function ReviewTab() {
             if (confirm('清空所有校对进度？不可恢复。')) {
               setState({})
               setIdx(0)
+              setNotice(null)
             }
           }}
         >
           清空进度
         </button>
       </div>
+
+      {notice && (
+        <div className="review-notice">
+          {notice}
+          <button className="icon-btn" onClick={() => setNotice(null)} title="知道了">
+            ×
+          </button>
+        </div>
+      )}
 
       <div className="progress">
         <div style={{ width: `${progress}%` }} />

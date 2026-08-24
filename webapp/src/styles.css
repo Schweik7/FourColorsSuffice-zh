@@ -744,6 +744,24 @@ figcaption.warn {
   color: var(--muted);
 }
 
+.review-notice {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 12px;
+  background: #eaf4ea;
+  border-bottom: 1px solid #cfe3cf;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #2f5d32;
+}
+
+.review-notice .icon-btn {
+  margin-left: auto;
+  flex: none;
+}
+
 .progress {
   flex: none;
   height: 5px;
