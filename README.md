@@ -24,6 +24,22 @@
 
 人工校对流程：`gen_review.py` 生成 `review.html` 对照页（原图 / 新图并排），校对意见记录在 `review_result.json`，返工稿存入 `_rejected_svg/`。
 
+## 插图工作台（`webapp/`）
+
+一个 Vite + React 应用，把上面的校对流程和一个新工具合到了一起：
+
+- **插图校对台** —— `review.html` 的移植版，能力照旧（对照、通过/待改、筛选、进度、导出 JSON）
+- **SVG 生成器** —— 给一张邻接图（可视化点选，或粘贴 NetworkX 风格的文本 / Python 代码），
+  生成对应的四色地图 SVG。三种风格（规整几何 / 地图手绘 / 自绘外框），一次出多张候选任选；
+  选中后可拖动边界线微调（**邻接关系不会因为拖动而改变**）、换配色、逐块控制标签显隐；
+  导出的 SVG 内嵌完整模型，拖回来就能接着编辑。
+
+```bash
+cd webapp && pnpm install && pnpm dev
+```
+
+原理与实现细节见 [`webapp/README.md`](webapp/README.md)。
+
 ## 仓库结构
 
 ```
@@ -33,7 +49,8 @@ images_original/           # 原书截取的位图，重绘时作对照基准
 _redraw_tools/             # 重绘规范、共享绘图库（多面体渲染等）、任务清单
 _rejected_svg/             # 校对未通过、待返工的 SVG
 res/                       # 附加材料（如肯普连杆机构的交互演示与推导）
-gen_review.py              # 生成人工校对对照页
+webapp/                    # 插图工作台：校对台 + 四色地图 SVG 生成器
+gen_review.py              # 生成人工校对对照页（webapp 之前的独立版本）
 epub_style.css             # EPUB 样式
 build_epub.ps1 / .bat      # 构建脚本
 ```

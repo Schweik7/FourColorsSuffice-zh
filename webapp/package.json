@@ -1,0 +1,34 @@
+{
+  "name": "fourcolors-suffice-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "《四色足矣》插图校对台 + 四色地图 SVG 生成器",
+  "packageManager": "pnpm@10.30.3",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "smoke": "esbuild scripts/smoke.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/smoke.mjs --log-level=warning && node node_modules/.tmp/smoke.mjs",
+    "parse-test": "esbuild scripts/parse-test.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/parse-test.mjs --log-level=warning && node node_modules/.tmp/parse-test.mjs",
+    "test": "pnpm parse-test && pnpm smoke"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "esbuild": "^0.28.2",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
