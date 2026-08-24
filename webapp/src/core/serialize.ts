@@ -25,7 +25,8 @@ export function embedMetadata(model: MapModel): string {
   ].join('\n')
 }
 
-function looksLikeModel(value: unknown): value is MapModel {
+/** 结构像不像一个本程序认得的模型。用于导入 SVG 和读取本地草稿 */
+export function looksLikeModel(value: unknown): value is MapModel {
   if (!value || typeof value !== 'object') return false
   const m = value as Partial<MapModel>
   return (

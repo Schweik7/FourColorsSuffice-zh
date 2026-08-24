@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import figures, { savedReview } from 'virtual:book-manifest'
 import { countProgress, parseProgress, type ProgressMap, type Status } from './progress'
+import { readStore, usePersist } from '../core/persist'
 
 type Filter = 'all' | 'todo' | 'fix' | 'nosvg'
 
 const KEY = 'fct-review-v1'
+/** 审阅进度之外的界面状态：停在哪一张、开着什么筛选、意见框里还没提交的字 */
+const UI_KEY = 'fct-review-ui-v1'
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: '全部' },
@@ -34,13 +37,32 @@ function loadInitialState(): { progress: ProgressMap; seeded: boolean } {
   return { progress, seeded: Object.keys(progress).length > 0 }
 }
 
+interface ReviewUi {
+  filter: Filter
+  /** 停留的插图 id。存 id 而不是序号——筛选一变，同一个序号指的就不是同一张了 */
+  currentId: string | null
+  /** 意见框里还没按「待改」提交的草稿，属于 currentId 那一张 */
+  draft: string
+}
+
+function loadUi(): ReviewUi {
+  const raw = readStore<Partial<ReviewUi>>(UI_KEY)
+  const filter = raw?.filter
+  return {
+    filter: FILTERS.some((f) => f.key === filter) ? (filter as Filter) : 'all',
+    currentId: typeof raw?.currentId === 'string' ? raw.currentId : null,
+    draft: typeof raw?.draft === 'string' ? raw.draft : '',
+  }
+}
+
 const assetUrl = (dir: string, file: string) =>
   `${import.meta.env.BASE_URL}${dir}/${encodeURIComponent(file)}`
 
 export default function ReviewTab() {
   const initial = useRef(loadInitialState())
+  const savedUi = useRef(loadUi())
   const [state, setState] = useState<ProgressMap>(initial.current.progress)
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filter, setFilter] = useState<Filter>(savedUi.current.filter)
   const [idx, setIdx] = useState(0)
   const [comment, setComment] = useState('')
   const [notice, setNotice] = useState<string | null>(() => {
@@ -66,9 +88,25 @@ export default function ReviewTab() {
   const clamped = Math.max(0, Math.min(idx, visible.length - 1))
   const current = visible[clamped]
 
-  // 切换条目时把文本框同步到该条已存的意见
+  // 恢复上次停留的位置。列表由筛选和进度共同决定，所以等 visible 算出来再按 id 找
+  const restored = useRef(false)
   useEffect(() => {
-    setComment(current ? (state[current.id]?.comment ?? '') : '')
+    if (restored.current) return
+    restored.current = true
+    const want = savedUi.current.currentId
+    if (!want) return
+    const i = visible.findIndex((f) => f.id === want)
+    if (i >= 0) setIdx(i)
+  }, [visible])
+
+  // 切换条目时把文本框同步到该条已存的意见；上次没提交完的草稿优先
+  useEffect(() => {
+    if (!current) {
+      setComment('')
+      return
+    }
+    const draft = savedUi.current.currentId === current.id ? savedUi.current.draft : ''
+    setComment(draft || (state[current.id]?.comment ?? ''))
     // 只在当前条目变化时同步，编辑过程中不要被覆盖
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id])
@@ -101,6 +139,8 @@ export default function ReviewTab() {
     },
     [current, comment, filter],
   )
+
+  usePersist(UI_KEY, { filter, currentId: current?.id ?? null, draft: comment })
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

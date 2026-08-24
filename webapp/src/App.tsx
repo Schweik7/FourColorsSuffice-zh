@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import ReviewTab from './review/ReviewTab'
 import GeneratorTab from './generator/GeneratorTab'
+import { readStore, usePersist } from './core/persist'
 
 type Tab = 'generator' | 'review'
+
+const TAB_KEY = 'fct-tab-v1'
 
 const TABS: { key: Tab; label: string; hint: string }[] = [
   { key: 'generator', label: 'SVG 生成器', hint: '按邻接关系生成四色地图' },
@@ -10,7 +13,11 @@ const TABS: { key: Tab; label: string; hint: string }[] = [
 ]
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('generator')
+  const [tab, setTab] = useState<Tab>(() => {
+    const saved = readStore<Tab>(TAB_KEY)
+    return TABS.some((t) => t.key === saved) ? saved! : 'generator'
+  })
+  usePersist(TAB_KEY, tab, 0)
 
   return (
     <div className="app">
