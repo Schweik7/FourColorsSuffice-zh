@@ -12,9 +12,10 @@ interface Props {
 }
 
 const STYLES: { key: StyleKind; label: string; desc: string }[] = [
-  { key: 'geometric', label: '规整几何', desc: '直线边界、棱角分明，铺满整块画布' },
-  { key: 'map', label: '地图手绘', desc: '样条平滑加低频抖动，自然形成海岸线' },
-  { key: 'frame', label: '自绘外框', desc: '你画出整体轮廓，地图只在框内生成' },
+  { key: 'bands', label: '嵌套色带', desc: '圆角矩形外框，环形分层、径向切分' },
+  { key: 'map', label: '地图手绘', desc: '同样的结构，边界带明显的手绘抖动' },
+  { key: 'geometric', label: '规整几何', desc: '直角外框、纯直线边界，棱角分明' },
+  { key: 'frame', label: '自绘外框', desc: '你画出整体轮廓，地图铺满这个框' },
 ]
 
 /** 每隔这么远才记一个点，免得手绘出成千上万个采样点 */
@@ -122,9 +123,19 @@ export default function StylePicker({
   )
 }
 
-/** 三种风格的示意缩略图 */
+/** 各风格的示意缩略图 */
 function StyleThumb({ kind }: { kind: StyleKind }) {
   const line = { stroke: '#2f2f2f', strokeWidth: 2 } as const
+  if (kind === 'bands') {
+    return (
+      <svg viewBox="0 0 100 64" className="thumb">
+        <path {...line} d="M2 14a12 12 0 0 1 12-12h72a12 12 0 0 1 12 12v36a12 12 0 0 1-12 12H14a12 12 0 0 1-12-12Z" fill="#c0504d" />
+        <path {...line} d="M14 20a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8v24a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8Z" fill="#e0b23c" />
+        <path {...line} d="M50 12h28a8 8 0 0 1 8 8v24a8 8 0 0 1-8 8H50Z" fill="#5a9257" />
+        <path {...line} d="M30 22h40v20H30Z" fill="#4f7cac" />
+      </svg>
+    )
+  }
   if (kind === 'geometric') {
     return (
       <svg viewBox="0 0 100 64" className="thumb">

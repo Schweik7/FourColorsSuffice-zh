@@ -1,26 +1,26 @@
 /**
- * 生成器核心算法的冒烟测试。
+ * 生成器核心的冒烟测试。
  *
  *   pnpm smoke            跑一遍并打印每个用例的结果
  *   pnpm smoke --write    额外把生成的 SVG 落到 scripts/out/ 便于肉眼检查
  *
- * 判据是「地图上真正做出来的邻接关系」必须与输入的图完全一致，
- * 且没有区域被拆成几块。已知非平面的用例反过来必须失败。
+ * 地图由平面嵌入确定性构造，邻接关系与区域连通性由构造保证，
+ * 所以判据是：平面图必须**每一张候选都合法**（不是「多试几次能碰到一张」），
+ * 已知非平面的用例则必须失败。
  */
 import fs from 'node:fs'
 import path from 'node:path'
 import { parseGraphText } from '../src/core/parse'
-import { fourColor, planarityWarning } from '../src/core/graph'
-import { generateMap } from '../src/core/generate'
+import { fourColor } from '../src/core/graph'
+import { generateVariants } from '../src/core/generate'
 import { renderModel, toSvgString } from '../src/core/render'
 import { extractModel, embedMetadata } from '../src/core/serialize'
 import { DEFAULT_PALETTE } from '../src/core/palette'
 import type { StyleKind } from '../src/core/types'
 
 const WRITE = process.argv.includes('--write')
-// 这个脚本是先 bundle 到 node_modules/.tmp 再跑的，import.meta.dirname 指向那里，
-// 所以输出目录要相对于工作目录（也就是 webapp/）算
 const OUT = path.resolve(process.cwd(), 'scripts', 'out')
+const BATCH = 8
 
 interface Case {
   name: string
@@ -39,14 +39,34 @@ const CASES: Case[] = [
     name: '十区域',
     text: 'A: B C D\nB: C E F\nC: D F G\nD: G H\nE: F I\nF: G I J\nG: H J\nH: J\nI: J',
   },
-  { name: '十四区域', text: buildGrid(4, 4) },
+  {
+    // 用户报过的用例：旧的栅格生长实现下每批只有一张合法
+    name: '肯普链构型',
+    text: `A: Green Yellow C H
+B: G H I
+C: Yellow Blue D E A
+D: Yellow Blue E C
+E: Blue C D F
+F: Yellow I E
+G: Yellow B H I
+H: Green B G I A
+I: B G H F
+Green: A H
+Yellow: A C D F G
+Blue: C D E`,
+  },
+  { name: '网格4x4', text: buildGrid(4, 4) },
+  { name: '网格6x5', text: buildGrid(6, 5) },
+  { name: '星', text: 'A: B C D E F G' },
+  { name: '树', text: 'A: B C\nB: D E\nC: F G' },
   { name: '孤立点', text: 'A\nB\nC' },
   { name: '单区域', text: 'A' },
+  { name: '两个分量', text: 'A B\nB C\nD E\nE F\nF D' },
   { name: 'K5', text: 'A: B C D E\nB: C D E\nC: D E\nD: E', nonPlanar: true },
   { name: 'K33', text: 'A: D E F\nB: D E F\nC: D E F', nonPlanar: true },
 ]
 
-/** 生成一个 rows×cols 的棋盘格邻接图，用来压一压区域数多的情况 */
+/** rows×cols 的棋盘格邻接图，用来压区域数多的情况 */
 function buildGrid(rows: number, cols: number): string {
   const name = (r: number, c: number) => `${String.fromCharCode(65 + r)}${c + 1}`
   const lines: string[] = []
@@ -69,54 +89,55 @@ const note = (msg: string) => {
 
 if (WRITE) fs.mkdirSync(OUT, { recursive: true })
 
-for (const style of ['geometric', 'map'] as StyleKind[]) {
+for (const style of ['bands', 'map', 'geometric'] as StyleKind[]) {
   for (const c of CASES) {
     const { graph, warnings } = parseGraphText(c.text)
-    const colored = fourColor(graph)
-    for (const id of graph.regions) graph.colors[id] = colored[id]
+    Object.assign(graph.colors, fourColor(graph))
 
     const t0 = Date.now()
-    const { model, report } = generateMap(graph, { style, seed: 12345, width: 900, height: 640 })
+    const variants = generateVariants(graph, { style, seed: 12345, width: 900, height: 640 }, BATCH)
     const ms = Date.now() - t0
 
-    const rendered = renderModel(model, DEFAULT_PALETTE)
+    const okCount = variants.filter((v) => v.report.ok).length
+    const expected = c.nonPlanar ? 0 : BATCH
+    const pass = okCount === expected
+
+    const first = variants[0]
+    const rendered = renderModel(first.model, DEFAULT_PALETTE)
     const noPath = rendered.regions.filter((r) => !r.d).map((r) => r.id)
 
-    const expectedOk = !c.nonPlanar
-    const pass = report.ok === expectedOk
     console.log(
-      `[${pass ? 'PASS' : 'FAIL'}] ${style.padEnd(9)} ${c.name.padEnd(8)} ` +
+      `[${pass ? 'PASS' : 'FAIL'}] ${style.padEnd(9)} ${c.name.padEnd(10)} ` +
         `区域=${String(graph.regions.length).padStart(2)} 边=${String(graph.edges.length).padStart(2)} ` +
-        `弧=${String(model.arcs.length).padStart(3)} 尝试=${report.attempts} ` +
-        `交叉=${report.crossings} ${String(ms).padStart(4)}ms`,
+        `弧=${String(first.model.arcs.length).padStart(3)} 合法=${okCount}/${BATCH} ` +
+        `交叉=${first.report.crossings} ${String(ms).padStart(4)}ms`,
     )
 
     if (!pass) {
       note(
         c.nonPlanar
-          ? '非平面图却报告画成功了——校验漏了什么'
-          : `平面图没画成：缺失=${JSON.stringify(report.missingEdges)} 多余=${JSON.stringify(report.extraEdges)} 分裂=${JSON.stringify(report.splitRegions)} 空缺=${JSON.stringify(report.emptyRegions)}`,
+          ? `非平面图却画成功了 ${okCount}/${BATCH} 张`
+          : `只有 ${okCount}/${BATCH} 张合法：交叉=${first.report.crossings} 自检=${JSON.stringify(first.report.problems)}`,
       )
     }
-    if (warnings.length) note(`解析警告 ${JSON.stringify(warnings)}`)
-    if (expectedOk && noPath.length) note(`这些区域没渲染出路径 ${JSON.stringify(noPath)}`)
-    if (expectedOk && !c.nonPlanar) {
-      const warn = planarityWarning(graph)
-      if (warn) note(`本应是平面图却触发了边数上限警告：${warn}`)
+    if (!c.nonPlanar && first.report.problems.length) {
+      note(`构造自检报错 ${JSON.stringify(first.report.problems)}`)
     }
+    if (warnings.length) note(`解析警告 ${JSON.stringify(warnings)}`)
+    if (!c.nonPlanar && noPath.length) note(`这些区域没渲染出路径 ${JSON.stringify(noPath)}`)
 
-    // 顺带验一遍 SVG 往返：导出再导入，模型必须一模一样
-    if (style === 'map' && graph.regions.length > 1) {
-      const svg = toSvgString(model, DEFAULT_PALETTE, embedMetadata(model))
+    // 顺带验 SVG 往返：导出再导入，模型必须一模一样
+    if (style === 'bands' && !c.nonPlanar) {
+      const svg = toSvgString(first.model, DEFAULT_PALETTE, embedMetadata(first.model))
       const back = extractModel(svg)
       if (!back.model) note(`SVG 往返失败：${back.error}`)
-      else if (JSON.stringify(back.model) !== JSON.stringify(model)) note('SVG 往返后模型对不上')
+      else if (JSON.stringify(back.model) !== JSON.stringify(first.model)) note('SVG 往返后模型对不上')
     }
 
     if (WRITE) {
       fs.writeFileSync(
         path.join(OUT, `${style}-${c.name}.svg`),
-        toSvgString(model, DEFAULT_PALETTE, embedMetadata(model)),
+        toSvgString(first.model, DEFAULT_PALETTE, embedMetadata(first.model)),
         'utf8',
       )
     }

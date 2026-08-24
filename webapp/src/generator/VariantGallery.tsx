@@ -14,12 +14,9 @@ interface Props {
 /** 把生成报告翻译成一句人话 */
 export function describeReport(r: GenerateResult['report']): { tone: 'ok' | 'warn'; text: string } {
   if (r.ok) return { tone: 'ok', text: '邻接关系完全吻合' }
-  const bits: string[] = []
-  if (r.missingEdges.length) bits.push(`缺 ${r.missingEdges.length} 条邻接`)
-  if (r.extraEdges.length) bits.push(`多 ${r.extraEdges.length} 条邻接`)
-  if (r.splitRegions.length) bits.push(`${r.splitRegions.join('、')} 被拆成了几块`)
-  if (r.emptyRegions.length) bits.push(`${r.emptyRegions.join('、')} 没画出来`)
-  return { tone: 'warn', text: bits.join('；') }
+  if (r.problems.length) return { tone: 'warn', text: r.problems.join('；') }
+  if (r.nonPlanarHint) return { tone: 'warn', text: r.nonPlanarHint }
+  return { tone: 'warn', text: `画法里还剩 ${r.crossings} 处边交叉，这个图画不成地图` }
 }
 
 export default function VariantGallery({ variants, palette, busy, onPick, onRegenerate }: Props) {

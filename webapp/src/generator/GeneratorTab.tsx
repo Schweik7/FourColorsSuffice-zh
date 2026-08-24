@@ -22,7 +22,7 @@ function initialGraph(): GraphSpec {
 
 export default function GeneratorTab() {
   const [graph, setGraph] = useState<GraphSpec>(initialGraph)
-  const [style, setStyle] = useState<StyleKind>('map')
+  const [style, setStyle] = useState<StyleKind>('bands')
   const [framePolygon, setFramePolygon] = useState<Pt[]>([])
   const [variants, setVariants] = useState<GenerateResult[]>([])
   const [model, setModel] = useState<MapModel | null>(null)
@@ -128,9 +128,10 @@ export default function GeneratorTab() {
         />
         {picked && !picked.report.ok && (
           <p className="warn strong">
-            这批候选都没能完全对上邻接关系（最好的一版：{describeReport(picked.report).text}）。
-            多半是这个图不是平面图——平面图才画得出地图。可以再点几次「再来一批」碰运气，
-            或回去检查邻接关系。
+            这个图画不成地图：{describeReport(picked.report).text}
+            <br />
+            地图的邻接图一定是平面图，反之亦然。再点「再来一批」也没用——
+            生成过程是确定的，不是碰运气，换个种子结果一样。请回去改邻接关系。
           </p>
         )}
       </div>

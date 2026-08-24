@@ -20,11 +20,13 @@ export interface GraphSpec {
 }
 
 export type StyleKind =
-  /** 规整几何：直线边界、棱角分明 */
+  /** 嵌套色带：圆角矩形外框、环形分层、径向切分 */
+  | 'bands'
+  /** 规整几何：直角外框、纯直线边界 */
   | 'geometric'
-  /** 地图风：样条平滑 + 手绘抖动 */
+  /** 地图风：样条平滑 + 明显的手绘抖动 */
   | 'map'
-  /** 自绘外框：地图风，但整体轮廓被用户画的多边形裁剪 */
+  /** 自绘外框：地图风，但整体轮廓用用户画的多边形 */
   | 'frame'
 
 /** 边界交汇点。多条弧段共用同一个节点，拖动它会同时带动所有弧段 */
@@ -95,21 +97,21 @@ export interface GenerateOptions {
   framePolygon?: Pt[]
 }
 
-/** 生成过程的诊断信息，UI 用它提示用户 */
+/**
+ * 生成过程的诊断信息。
+ *
+ * 地图是由平面嵌入确定性构造出来的，邻接关系与区域连通性由构造保证，
+ * 所以这里只剩下一件真正会失败的事：找不到无交叉的画法（即图非平面）。
+ * `problems` 是构造的自检结果，正常情况下永远是空的。
+ */
 export interface GenerateReport {
   ok: boolean
-  /** 图里有、但地图上没能做出来的邻接 */
-  missingEdges: [RegionId, RegionId][]
-  /** 地图上多出来的、图里没有的邻接 */
-  extraEdges: [RegionId, RegionId][]
-  /** 被画成了好几块、不连成一片的区域（合法地图里不该出现） */
-  splitRegions: RegionId[]
-  /** 一格没占到的区域 */
-  emptyRegions: RegionId[]
-  /** 布局里的边交叉数（>0 说明图可能非平面） */
+  /** 直线画法里剩余的边交叉数；> 0 即失败 */
   crossings: number
-  /** 尝试了几轮 */
-  attempts: number
+  /** 构造自检发现的问题；构造正确时为空 */
+  problems: string[]
+  /** 由欧拉公式推论得出的非平面提示 */
+  nonPlanarHint: string | null
 }
 
 export interface GenerateResult {

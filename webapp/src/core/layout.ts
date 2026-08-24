@@ -1,38 +1,10 @@
 import type { GraphSpec, Pt, RegionId } from './types'
 import type { Rng } from './rng'
+import { countCrossings } from './planar'
 
 export interface Layout {
   pos: Record<RegionId, Pt>
   crossings: number
-}
-
-function orient(a: Pt, b: Pt, c: Pt): number {
-  const v = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
-  return Math.abs(v) < 1e-9 ? 0 : Math.sign(v)
-}
-
-/** 真交叉：两段在内部相交，共享端点不算 */
-function segmentsCross(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
-  if (p1 === p3 || p1 === p4 || p2 === p3 || p2 === p4) return false
-  const d1 = orient(p3, p4, p1)
-  const d2 = orient(p3, p4, p2)
-  const d3 = orient(p1, p2, p3)
-  const d4 = orient(p1, p2, p4)
-  return d1 !== d2 && d3 !== d4 && d1 !== 0 && d2 !== 0 && d3 !== 0 && d4 !== 0
-}
-
-function countCrossings(graph: GraphSpec, pos: Record<RegionId, Pt>): number {
-  const { edges } = graph
-  let n = 0
-  for (let i = 0; i < edges.length; i++) {
-    for (let j = i + 1; j < edges.length; j++) {
-      const [a, b] = edges[i]
-      const [c, d] = edges[j]
-      if (a === c || a === d || b === c || b === d) continue
-      if (segmentsCross(pos[a], pos[b], pos[c], pos[d])) n++
-    }
-  }
-  return n
 }
 
 /** 点到线段的最近点 */
@@ -108,8 +80,8 @@ function simulate(graph: GraphSpec, rng: Rng, opts: SimOptions): Record<RegionId
       disp[b].y += (dy / dist) * f
     }
 
-    // 顶点与不相邻的边互斥：避免某个区域的种子圆压在别人的边带上，
-    // 那会在栅格生长阶段造出图里没有的邻接
+    // 顶点与不相邻的边互斥：顶点贴着一条无关的边时，方位角会失去意义，
+    // 由它导出的旋转系统（进而是平面嵌入）就不可靠了
     const minGap = k * 0.75
     for (const v of ids) {
       for (const [a, b] of graph.edges) {
