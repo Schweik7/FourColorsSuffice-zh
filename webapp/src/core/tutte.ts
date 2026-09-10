@@ -175,6 +175,53 @@ export interface BalanceInput {
   frame: Pt[]
 }
 
+/** 外框包围盒的短边，用来把各种阈值换算成与图幅无关的比例 */
+function frameScale(frame: Pt[]): number {
+  let minX = Infinity
+  let maxX = -Infinity
+  let minY = Infinity
+  let maxY = -Infinity
+  for (const p of frame) {
+    minX = Math.min(minX, p.x)
+    maxX = Math.max(maxX, p.x)
+    minY = Math.min(minY, p.y)
+    maxY = Math.max(maxY, p.y)
+  }
+  return Math.min(maxX - minX, maxY - minY)
+}
+
+/** 点到线段的距离 */
+function pointSegDistance(p: Pt, a: Pt, b: Pt): number {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len2 = dx * dx + dy * dy
+  const t = len2 < 1e-12 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2))
+  return Math.hypot(a.x + dx * t - p.x, a.y + dy * t - p.y)
+}
+
+/**
+ * 画法里顶点离**与它不相邻**的边最近有多近。
+ *
+ * 这是交叉数查不出来的那种退化：顶点压在一条不相邻的边上时，边与边并没有
+ * 真正相交，交叉数照样是 0，但顶点周围已经有面被压成零面积了。
+ */
+export function vertexEdgeGap(graph: GraphSpec, pos: Record<RegionId, Pt>): number {
+  let best = Infinity
+  for (const v of graph.regions) {
+    const pv = pos[v]
+    if (!pv) continue
+    for (const [a, b] of graph.edges) {
+      if (v === a || v === b) continue
+      const pa = pos[a]
+      const pb = pos[b]
+      if (!pa || !pb) continue
+      const d = pointSegDistance(pv, pa, pb)
+      if (d < best) best = d
+    }
+  }
+  return best
+}
+
 /**
  * 面积均衡。
  *
@@ -194,6 +241,13 @@ export function balanceAreas(graph: GraphSpec, input: BalanceInput, rounds = 240
   const isPinned = new Set(order)
   let current = input.pos
   let params = new Map(input.pinnedParam)
+
+  // 光数交叉是不够的：顶点滑到一条不相邻的边**上面**并不算交叉，
+  // 却已经把画法弄退化了——那个顶点周围的面面积归零，重心细分的扇形
+  // 就会翻面叠在一起，成图上表现为区域互相盖住、该相邻的反倒不挨着。
+  // 所以每一步还要看顶点离非邻接边有多远，不许把它推得比现在更近。
+  const scale = frameScale(input.frame)
+  const sepFloor = scale * 0.03
 
   /**
    * 把滑动后的参数夹回合法范围：保持环形次序，两两至少隔开 minGap。
@@ -282,7 +336,10 @@ export function balanceAreas(graph: GraphSpec, input: BalanceInput, rounds = 240
           ? perim.at(settled.get(v)!)
           : { x: current[v].x + push[v].x * step, y: current[v].y + push[v].y * step }
       }
-      if (countCrossings(graph, next) === 0) {
+      // 不要求达到 sepFloor，只要求「不比现在更差」：Tutte 对大图本来就可能
+      // 摊得很紧，硬卡绝对下限会让每一步都被否掉，均衡直接变成空操作
+      const allow = Math.min(sepFloor, vertexEdgeGap(graph, current))
+      if (countCrossings(graph, next) === 0 && vertexEdgeGap(graph, next) >= allow) {
         applied = { pos: next, params: settled }
         break
       }

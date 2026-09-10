@@ -31,6 +31,19 @@ export default function MapView({
       ref={svgRef}
       className={className}
       viewBox={`0 0 ${rendered.width} ${rendered.height}`}
+      /*
+       * 宽高一定要写出来。只给 viewBox 的话 SVG 的默认尺寸是 100%×100%，
+       * 它会把自己撑满整个窗格，再靠 preserveAspectRatio 把图放大塞进去——
+       * 于是屏幕越宽图画得越大，边框和字号跟着一起放大，屏上所见和导出的
+       * 900×640 对不上。写了宽高之后它就有了固有尺寸，CSS 的 max-width /
+       * max-height 只会把它缩小，不会放大，显示就是 1:1。
+       *
+       * 顺带修好指针换算：撑满窗格时元素比图大一圈（上下留黑边），
+       * 而 toModel 是按元素矩形等比折算的，那一圈边会让坐标整体偏掉。
+       * 缩略图那边 .variant-svg 在 CSS 里显式设了宽高，不受这两个属性影响。
+       */
+      width={rendered.width}
+      height={rendered.height}
       xmlns="http://www.w3.org/2000/svg"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

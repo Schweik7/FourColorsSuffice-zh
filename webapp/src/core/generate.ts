@@ -15,10 +15,10 @@ import { PROTOCOL, PROTOCOL_VERSION } from './types'
 import { edgeKey, normalizeGraph, planarityWarning } from './graph'
 import { makeRng, type Rng } from './rng'
 import { layoutGraph } from './layout'
-import { connectedComponents, countCrossings } from './planar'
+import { connectedComponents, countCrossings, nonConvexFaces } from './planar'
 import { constructBalanced, roundedRectPath } from './construct'
 import { onionLayout } from './onion'
-import { balanceAreas, tutteEmbed } from './tutte'
+import { balanceAreas, tutteEmbed, vertexEdgeGap } from './tutte'
 import { jitter, resample } from './smooth'
 
 interface StyleConfig {
@@ -58,8 +58,13 @@ function islandGrid(count: number, width: number, height: number) {
  * 给一个连通分量求无交叉的直线画法。
  *
  * 先试洋葱布局（分层同心，观感最接近书里的插图，而且完全确定）；
- * 不行再退回力导向 + 消交叉。**只要交叉数为 0，后面的构造就一定正确**，
- * 所以这一步是整条链上唯一可能失败的地方，而它的失败等价于「这个图不是平面图」。
+ * 不行再退回力导向 + 消交叉。
+ *
+ * **判据不能只看交叉数。** 顶点滑到一条不相邻的边上面时，边与边并没有真正相交，
+ * 交叉数照样是 0，可那个顶点周围已经有面被压成零面积了。重心细分要求面心落在
+ * 面内，面一旦退化，绕顶点的那一圈扇形就会翻面叠在一起——组合上仍然「环闭合、
+ * 弧两侧对得上」，几何上却是一团互相盖住的乱麻。复杂的图之所以画出来特别奇怪，
+ * 根子就在这里。所以还要看顶点离非邻接边有多远，退化的画法一律不用。
  */
 function drawComponent(
   graph: GraphSpec,
@@ -70,39 +75,55 @@ function drawComponent(
 ): { pos: Record<RegionId, Pt>; crossings: number } {
   const { width, height, ox, oy } = cell
 
-  // 第一步：先求一张无交叉的画法，供 Tutte 认出外面
-  let base: Record<RegionId, Pt> | null = null
-  let crossings = Infinity
+  /**
+   * 候选画法的好坏，依次比：交叉数 → 凹面数 → 顶点离非邻接边的距离。
+   * 前两项决定构造出来的地图对不对，第三项只是同分时挑个稳当的。
+   */
+  type Draft = { pos: Record<RegionId, Pt>; crossings: number; concave: number; gap: number }
+  const rate = (pos: Record<RegionId, Pt>): Draft => ({
+    pos,
+    crossings: countCrossings(graph, pos),
+    concave: nonConvexFaces(graph, pos),
+    gap: vertexEdgeGap(graph, pos),
+  })
+  const better = (a: Draft, b: Draft) =>
+    a.crossings !== b.crossings
+      ? a.crossings - b.crossings
+      : a.concave !== b.concave
+        ? a.concave - b.concave
+        : b.gap - a.gap
 
+  // 第一步：先求一张能用的画法，供 Tutte 认出外面
+  const drafts: Draft[] = []
   const viaOnion = onionLayout(graph, width, height, margin)
-  if (viaOnion) {
-    base = viaOnion.pos
-    crossings = viaOnion.crossings
+  if (viaOnion) drafts.push(rate(viaOnion.pos))
+  // 洋葱那版已经完美就不动力导向了：它要消耗随机数
+  if (!drafts.length || drafts[0].crossings > 0 || drafts[0].concave > 0) {
+    drafts.push(rate(layoutGraph(graph, rng, width, height).pos))
   }
-  if (crossings > 0) {
-    const viaForce = layoutGraph(graph, rng, width, height)
-    if (viaForce.crossings < crossings) {
-      base = viaForce.pos
-      crossings = viaForce.crossings
-    }
-  }
-  if (!base) return { pos: {}, crossings: 0 }
+  drafts.sort(better)
+  const first = drafts[0]
+  if (!first) return { pos: {}, crossings: 0 }
 
   // 上面两路都在 (0,0)–(width,height) 里算，统一挪到本格的绝对位置，
   // 后面 Tutte 用的内缩框是绝对坐标，两边必须对齐
-  shift(base, ox, oy)
-  if (crossings > 0) return { pos: base, crossings }
+  shift(first.pos, ox, oy)
+  if (first.crossings > 0) return { pos: first.pos, crossings: first.crossings }
 
   // 第二步：把外面钉到内缩框上做 Tutte 松弛，让各个面摊得均匀。
   // 重心细分里区域面积随面的面积走，面均匀了区域才不会被挤成细条。
-  const relaxed = tutteEmbed(graph, base, innerFrame)
+  // 第三步：Tutte 保证了面是凸的但没保证大小均匀，再把区域面积拉平。
+  //
+  // 三张一起进候选池按同一把尺子挑，而不是「达标就用、不达标退回上一步」——
+  // 后者会在 Tutte 明明更好、只是没到阈值时，退回一张更差的画法。
+  const finals: Draft[] = [{ ...first, pos: first.pos }]
+  const relaxed = tutteEmbed(graph, first.pos, innerFrame)
   if (relaxed && relaxed.crossings === 0 && relaxed.spread > 0.012) {
-    // 第三步：Tutte 保证了面是凸的但没保证大小均匀，再把区域面积拉平
-    return { pos: balanceAreas(graph, relaxed), crossings: 0 }
+    finals.push(rate(relaxed.pos))
+    finals.push(rate(balanceAreas(graph, relaxed)))
   }
-
-  // Tutte 塌了（图有割点/桥时会这样），退回上一步的画法
-  return { pos: base, crossings: 0 }
+  finals.sort(better)
+  return { pos: finals[0].pos, crossings: finals[0].crossings }
 }
 
 /** 平移一组坐标 */
@@ -117,7 +138,12 @@ function shift(pos: Record<RegionId, Pt>, dx: number, dy: number) {
  * 自检：区域的每条边界环必须首尾相接，且弧两侧的区域对必须恰好等于图里的边。
  * 构造本身已经保证了这两点，这里是防止将来改坏的断言。
  */
-function verify(graph: GraphSpec, arcs: ArcModel[], regions: RegionModel[], nodes: NodeModel[]) {
+export function verifyTopology(
+  graph: GraphSpec,
+  arcs: ArcModel[],
+  regions: RegionModel[],
+  nodes: NodeModel[],
+) {
   const nodeIds = new Set(nodes.map((n) => n.id))
   const byId = new Map(arcs.map((a) => [a.id, a]))
   const problems: string[] = []
@@ -228,7 +254,7 @@ export function generateMap(graph: GraphSpec, opts: GenerateOptions): GenerateRe
     return { ...arc, mid: pts.slice(1, -1) }
   })
 
-  const problems = verify(clean, styled, regions, nodes)
+  const problems = verifyTopology(clean, styled, regions, nodes)
   const planarNote = planarityWarning(clean)
 
   const model: MapModel = {

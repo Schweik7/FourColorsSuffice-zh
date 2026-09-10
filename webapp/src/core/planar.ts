@@ -49,6 +49,55 @@ export function segmentsCross(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
   return d1 !== d2 && d3 !== d4 && d1 !== 0 && d2 !== 0 && d3 !== 0 && d4 !== 0
 }
 
+/**
+ * 有多少个内面不是凸的。
+ *
+ * 这是判断一张直线画法能不能拿去做重心细分的**直接**判据。构造要求面心落在面内，
+ * 而面心是面上顶点的凸组合——凸组合仍在面内，当且仅当面是凸的。面一旦凹了，
+ * 面心可能跑到面外，绕顶点的那一圈扇形就会翻面自交，成图上表现为区域互相盖住。
+ *
+ * 光看交叉数是看不出来的：顶点滑到一条不相邻的边上并不构成边与边相交，
+ * 交叉数照样是 0，面却已经退化了。所以挑画法要以这个数为准。
+ * 外面不算——它的边界最后会被展开到外框上，凹不凹都无所谓。
+ */
+export function nonConvexFaces(graph: GraphSpec, pos: Record<RegionId, Pt>): number {
+  if (!graph.edges.length) return 0
+  let emb: Embedding
+  try {
+    emb = buildEmbedding(graph, pos)
+  } catch {
+    return graph.edges.length // 连嵌入都建不起来，当作全坏
+  }
+
+  let bad = 0
+  emb.faces.forEach((face, i) => {
+    if (i === emb.outerIndex || face.darts.length < 3) return
+    const poly = face.darts.map((d) => pos[d.from]).filter(Boolean)
+    if (poly.length < 3) {
+      bad++
+      return
+    }
+    let sign = 0
+    for (let k = 0; k < poly.length; k++) {
+      const a = poly[k]
+      const b = poly[(k + 1) % poly.length]
+      const c = poly[(k + 2) % poly.length]
+      const o = orient(a, b, c)
+      if (o === 0) {
+        // 三点共线：面已经被压扁，同样不能用
+        bad++
+        return
+      }
+      if (sign === 0) sign = o
+      else if (o !== sign) {
+        bad++
+        return
+      }
+    }
+  })
+  return bad
+}
+
 export function countCrossings(graph: GraphSpec, pos: Record<RegionId, Pt>): number {
   const { edges } = graph
   let n = 0
